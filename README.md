@@ -25,6 +25,10 @@ Turns a Samsung The Frame TV into a living digital frame: it picks images that m
 |---|---|
 | ![오로라](docs/screenshots/frame-space.jpg) | ![절기 표시](docs/screenshots/frame-with-solar-term.jpg) |
 
+| 시각 표시 | 시각 표시를 켠 명화 |
+|---|---|
+| ![시각 표시](docs/screenshots/frame-clock.jpg) | ![명화와 시각](docs/screenshots/frame-clock-painting.jpg) |
+
 ### 관리 페이지
 
 시간대를 고르면 벽 조명이 함께 바뀌고, 글자는 액자 위에서 직접 끌어 옮깁니다.
@@ -41,15 +45,20 @@ Turns a Samsung The Frame TV into a living digital frame: it picks images that m
 |---|---|
 | ![TV 연결](docs/screenshots/admin-tv.jpg) | ![자동 교체](docs/screenshots/admin-auto.jpg) |
 
+| 시각 표시와 버전 |
+|---|
+| ![시각 표시 설정](docs/screenshots/admin-clock.jpg) |
+
 휴대폰에서도 쓸 수 있습니다.
 
 <img src="docs/screenshots/admin-phone.jpg" alt="휴대폰 화면" width="260">
 
 ## 무엇을 하나요
 
-- 10분마다 지금 시간대와 날씨를 확인합니다.
+- 5분마다 지금 시간대와 날씨를 확인합니다.
 - 시간대나 날씨가 바뀌거나 정해 둔 간격(기본 3시간)이 지나면 어울리는 이미지로 바꿉니다.
 - 이미지에 날씨, 기온, 작품명을 작게 넣습니다.
+- 켜 두면 현재 시각을 5분 단위로 함께 표시합니다.
 - 글자가 놓일 자리의 밝기를 재서, 밝으면 검은 글자로 바꿉니다.
 - TV 크기를 모델명에서 읽어, 어떤 인치에서도 글자가 같은 실제 크기로 보이게 합니다.
 - 명화는 자르지 않고 어두운 벽에 건 모습으로 보여 줍니다.
@@ -93,7 +102,7 @@ cd ~/TheFrameVanced
 
 | 서비스 | 하는 일 |
 |---|---|
-| `theframevanced.timer` | 10분마다 `theframevanced.service`를 실행 |
+| `theframevanced.timer` | 5분마다 `theframevanced.service`를 실행 |
 | `theframevanced.service` | 교체가 필요한지 판단하고 TV에 반영한 뒤 종료 |
 | `theframevanced-admin.service` | 관리 페이지를 계속 실행 |
 | `theframevanced-update.timer` | 하루 한 번 새 버전 확인 |
@@ -155,104 +164,6 @@ git push origin v0.2.0
 
 ## 관리 페이지
 
-시간대를 고르면 벽 조명이 함께 바뀌고, 글자는 액자 위에서 직접 끌어 옮깁니다.
-
-| 글자 설정 | 글자 끌어서 옮기기 |
-|---|---|
-| ![글자 설정](docs/screenshots/admin-layout.jpg) | ![글자 끌기](docs/screenshots/admin-drag-caption.jpg) |
-
-| 테마 고르기 | 이미지 소스 추가 |
-|---|---|
-| ![테마 고르기](docs/screenshots/admin-images.jpg) | ![이미지 소스 추가](docs/screenshots/admin-sources.jpg) |
-
-| TV 연결 | 지역과 자동 교체 |
-|---|---|
-| ![TV 연결](docs/screenshots/admin-tv.jpg) | ![자동 교체](docs/screenshots/admin-auto.jpg) |
-
-휴대폰에서도 쓸 수 있습니다.
-
-<img src="docs/screenshots/admin-phone.jpg" alt="휴대폰 화면" width="260">
-
-## 무엇을 하나요
-
-- 10분마다 지금 시간대와 날씨를 확인합니다.
-- 시간대나 날씨가 바뀌거나 정해 둔 간격(기본 3시간)이 지나면 어울리는 이미지로 바꿉니다.
-- 이미지에 날씨, 기온, 작품명을 작게 넣습니다.
-- 글자가 놓일 자리의 밝기를 재서, 밝으면 검은 글자로 바꿉니다.
-- TV 크기를 모델명에서 읽어, 어떤 인치에서도 글자가 같은 실제 크기로 보이게 합니다.
-- 명화는 자르지 않고 어두운 벽에 건 모습으로 보여 줍니다.
-- 테마를 골라 원하는 이미지만 나오게 하고, 내 폴더나 인터넷의 이미지를 직접 추가할 수 있습니다.
-- TV를 시청 중이면 화면을 건드리지 않고, TV가 꺼져 있으면 깨우지 않습니다.
-
-## 준비물
-
-- 아트모드를 지원하는 삼성 더 프레임 TV ([지원 범위](#지원하는-tv) 참고)
-- TV와 같은 네트워크에 있는 Linux 서버
-- Python 3.10 이상, `systemd`, Noto Sans CJK 글꼴 (`fonts-noto-cjk`)
-
-글꼴 경로는 Ubuntu 기준으로 `frame.py`의 `FONT_PATHS`에 들어 있습니다. 다른 배포판이면 이 값을 바꾸세요.
-
-## 설치
-
-```bash
-git clone https://github.com/dicebattle/TheFrameVanced.git ~/TheFrameVanced
-cd ~/TheFrameVanced
-python3 -m venv .venv
-.venv/bin/pip install -r requirements.txt
-mkdir -p data/library
-cp config.example.json data/config.json
-```
-
-이미지를 내려받습니다. 소스별 요청 제한을 지키느라 시간이 걸릴 수 있습니다. 다시 실행하면 이어서 받습니다.
-
-```bash
-.venv/bin/python tools/build_library.py library/manifest.json data/library
-```
-
-## 데몬으로 실행하기
-
-별도의 상주 프로그램을 직접 띄울 필요 없이, `systemd` 사용자 서비스로 돌아갑니다. 서버를 재부팅해도 자동으로 다시 시작합니다.
-
-| 서비스 | 하는 일 |
-|---|---|
-| `theframevanced.timer` | 10분마다 `theframevanced.service`를 실행 |
-| `theframevanced.service` | 교체가 필요한지 판단하고 TV에 반영한 뒤 종료 |
-| `theframevanced-admin.service` | 관리 페이지를 계속 실행 |
-
-처음 한 번만 등록합니다.
-
-```bash
-mkdir -p ~/.config/systemd/user
-cp systemd/* ~/.config/systemd/user/
-systemctl --user daemon-reload
-systemctl --user enable --now theframevanced-admin.service theframevanced.timer
-loginctl enable-linger "$USER"
-```
-
-`loginctl enable-linger`는 로그아웃한 뒤에도 서비스가 돌도록 합니다. 타이머는 관리 페이지의 `자동 교체 켜기`로도 켜고 끌 수 있습니다.
-
-자주 쓰는 명령입니다.
-
-```bash
-systemctl --user status theframevanced.timer theframevanced-admin.service
-journalctl --user -u theframevanced -f
-systemctl --user disable --now theframevanced.timer
-systemctl --user restart theframevanced-admin.service
-```
-
-순서대로 상태 확인, 실행 기록 보기, 자동 교체 끄기, 관리 페이지 다시 시작입니다.
-
-서비스 없이 직접 실행할 수도 있습니다.
-
-```bash
-.venv/bin/python frame.py --data data --dry-run --force
-.venv/bin/python frame.py --data data --force
-```
-
-`--dry-run`은 TV에 보내지 않고 `data/output/preview.jpg`만 만듭니다. `--force`는 조건과 상관없이 지금 교체합니다. `--image 이미지ID`로 특정 이미지를 고를 수 있습니다.
-
-## 관리 페이지
-
 관리 페이지에는 로그인이 없어서 서버의 `127.0.0.1:8765`에서만 열립니다. 다른 컴퓨터에서는 SSH 터널로 여세요.
 
 ```bash
@@ -276,7 +187,17 @@ ssh -N -L 8765:127.0.0.1:8765 사용자@서버주소
 | `{temp}` | 기온 | 12 |
 | `{title}` | 작품명 또는 사진 제목 | 론강의 별이 빛나는 밤, 빈센트 반 고흐 |
 | `{term}` | 24절기 | 상강 |
+| `{time}` | 표시 시각 | 14:35 |
 | `{location}` | 지역 이름 | 서울 |
+
+## 시각 표시
+
+`자동 교체` 탭의 `시각 표시`를 켜면 5분마다 같은 그림에 새 시각을 넣어 TV에 보냅니다. `이전 이미지 자동 삭제`도 함께 켜 두세요. 5분마다 이미지가 하나씩 늘기 때문입니다.
+
+- 정각에 맞추려고 30초 먼저 준비해 업로드하고, 시각이 되면 작품만 바꿉니다.
+- 아트모드일 때만 시각을 바꿉니다. 저장장치 쓰기를 줄이려고, TV를 보는 중이거나 화면이 꺼져 있으면 건너뜁니다.
+- 그래서 TV가 다시 아트모드로 돌아오면 다음 5분 단위까지 이전 시각이 보일 수 있습니다.
+- 켜 두면 아트모드에서 하루 최대 288번 TV에 쓰고 지웁니다. 저장장치 수명에 주는 영향은 확인하지 못했습니다.
 
 ## 이전 이미지 자동 삭제
 
@@ -387,7 +308,7 @@ cd ~/TheFrameVanced
 
 | 서비스 | 보내는 내용 | 시점 |
 |---|---|---|
-| [Open-Meteo](https://open-meteo.com/) | 설정한 지역의 좌표 | 10분마다, 지역을 정할 때 |
+| [Open-Meteo](https://open-meteo.com/) | 설정한 지역의 좌표 | 5분마다, 지역을 정할 때 |
 | [OpenStreetMap Nominatim](https://nominatim.org/) | 입력한 지역 이름 | `찾기`를 누를 때만 |
 | 기본 이미지 소스 | 이미지 요청 | 이미지를 내려받을 때 |
 | 직접 추가한 주소 | 이미지 요청 | `가져오기`를 누를 때만 |
@@ -411,6 +332,8 @@ README 스크린샷에 쓴 이미지입니다.
 | `frame-city` | 도쿄 롯폰기의 밤 | Syced | CC0 |
 | `frame-space` | 우주에서 본 오로라 | NASA | 공개 도메인 |
 | `frame-with-solar-term` | 황야의 황혼 | 프레더릭 에드윈 처치 | 공개 도메인 |
+| `frame-clock` | 부산 광안대교의 밤 | lumoplank | CC0 |
+| `frame-clock-painting` | 몽마르트르 대로의 밤 | 카미유 피사로 | 공개 도메인 |
 
 ## 라이선스
 

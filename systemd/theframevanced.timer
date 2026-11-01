@@ -1,9 +1,9 @@
 [Unit]
-Description=Check every 10 minutes whether The Frame needs a new image
+Description=Check every 5 minutes whether The Frame needs a new image
 
 [Timer]
-OnCalendar=*:0/10
-RandomizedDelaySec=30
+OnCalendar=*:4/5:30
+AccuracySec=1s
 Persistent=false
 
 [Install]

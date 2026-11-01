@@ -11,6 +11,7 @@ import re
 import signal
 import socket
 import ssl
+import time
 import urllib.parse
 import urllib.request
 from datetime import datetime, timedelta
@@ -30,6 +31,8 @@ FONT_PATHS = {
 FONT_INDEX_KR = 1
 # Text sizes are stored for a 75 inch TV and scaled so the printed size stays the same on any TV.
 REFERENCE_INCHES = 75
+# How long before the change to reconnect to the TV.
+RECONNECT_SECONDS = 2
 # Small TVs are watched from closer, so the size is not matched all the way down.
 MAX_TEXT_SCALE = 1.8
 # Keeps text inside the screen edge, whatever its size.
@@ -145,6 +148,7 @@ def build_context(cfg, now):
         "temperature": round(data["current"]["temperature_2m"]),
         "term": term,
         "season": season,
+        "time": f"{now:%H:%M}",
     }
 
 
@@ -211,6 +215,7 @@ def caption_lines(item, ctx, cfg, layout):
         "weather": ctx["weather_label"],
         "temp": ctx["temperature"],
         "title": item.get("caption", ""),
+        "time": ctx.get("time", ""),
     }
     fill = lambda text: re.sub(r"\{(\w+)\}", lambda m: str(values.get(m[1], m[0])), text)
     return [fill(layout["headline"]), fill(layout["caption"])]
@@ -440,9 +445,12 @@ def check_tv(art, profile):
     return found
 
 
-def update_tv(art, path, state, cleanup, profile):
+def update_tv(art, path, state, cleanup, profile, show_at=None, art_mode_only=False, reopen=None):
     art_on = art.get_artmode() == "on"
     record(profile, "read_status", True)
+    if art_mode_only and not art_on:
+        print("not in Art Mode, clock skipped", flush=True)
+        return None
     before = my_images(art)
     uploaded = state.setdefault("uploaded", [])
     try:
@@ -457,6 +465,10 @@ def update_tv(art, path, state, cleanup, profile):
     record(profile, "upload", True)
     uploaded.append(new_id)
 
+    # Uploading takes a few seconds, so the image is ready early and changes on the minute.
+    if show_at:
+        art = reopen() if reopen else art
+        wait_until(show_at)
     # Never call set_artmode here: on some models it does not reply and blocks forever.
     art.select_image(new_id, show=art_on)
     current = art.get_current().get("content_id")
@@ -490,13 +502,28 @@ def update_tv(art, path, state, cleanup, profile):
     return new_id
 
 
-def push_to_tv(cfg, path, state, cleanup, profile):
+def push_to_tv(cfg, path, state, cleanup, profile, show_at=None, art_mode_only=False):
     # Imported here so that dry runs work without the TV library.
     from samsungtvws import SamsungTVWS
 
-    tv = SamsungTVWS(cfg["tv_host"], port=8002, name="TheFrameVanced", timeout=30)
+    def connect():
+        # key_press_delay only matters for remote keys; here it would add a second to every request.
+        return SamsungTVWS(cfg["tv_host"], port=8002, name="TheFrameVanced", timeout=30, key_press_delay=0)
+
+    tv = connect()
+
+    def reopen():
+        # The TV drops a connection that sits idle, so wait without one and reconnect just in time.
+        nonlocal tv
+        tv.close()
+        wait_until(show_at - timedelta(seconds=RECONNECT_SECONDS))
+        tv = connect()
+        art = tv.art()
+        art.open()
+        return art
+
     try:
-        return update_tv(tv.art(), path, state, cleanup, profile)
+        return update_tv(tv.art(), path, state, cleanup, profile, show_at, art_mode_only, reopen)
     finally:
         tv.close()
 
@@ -521,6 +548,20 @@ def print_report(cfg, profile):
     for feature in ("read_status", "list_images", "upload", "show", "delete"):
         entry = profile.get("features", {}).get(feature, {})
         print(f'| {feature} | {names[entry.get("ok")] if entry else "not tried"} {entry.get("detail", "")} |')
+
+
+def next_clock_time(now, every):
+    """The next time on the clock's grid, such as 14:35 for every 5 minutes."""
+    moment = now.replace(second=0, microsecond=0)
+    if moment != now:
+        moment += timedelta(minutes=1)
+    return moment + timedelta(minutes=-moment.minute % every)
+
+
+def wait_until(moment):
+    delay = (moment - datetime.now(moment.tzinfo)).total_seconds()
+    if delay > 0:
+        time.sleep(delay)
 
 
 def needs_change(cfg, ctx, state, now):
@@ -561,10 +602,14 @@ def main():
     state = load_json(state_path, {})
     now = datetime.now(ZoneInfo(cfg["timezone"]))
     ctx = build_context(cfg, now)
+    every = cfg.get("clock_minutes") or 0
+    show_at = next_clock_time(now, every) if every else None
+    ctx["time"] = f"{show_at or now:%H:%M}"
     print(now.isoformat(timespec="minutes"), json.dumps(ctx, ensure_ascii=False), flush=True)
 
     reason = "forced" if args.force or args.image else needs_change(cfg, ctx, state, now)
-    if not reason:
+    clock_only = not reason and every and state.get("clock_shown") != show_at.isoformat()
+    if not reason and not clock_only:
         print("no change needed")
         return
     if not args.dry_run and not tv_reachable(cfg["tv_host"]):
@@ -580,8 +625,13 @@ def main():
     if args.image:
         item = next(i for i in catalog if i["id"] == args.image)
     else:
-        item = pick_image(catalog, ctx, state, cfg.get("disabled_themes", []))
-    print(f'{reason}: {item["id"]}', flush=True)
+        # When only the time changes, keep the picture on the wall as long as it still fits.
+        last = (state.get("history") or [None])[-1]
+        item = next((i for i in catalog if i["id"] == last), None) if clock_only else None
+        if clock_only and (item is None or score(item, ctx, None) is None):
+            reason, clock_only, item = "image no longer fits", False, None
+        item = item or pick_image(catalog, ctx, state, cfg.get("disabled_themes", []))
+    print(f'{reason or "clock"}: {item["id"]}', flush=True)
     out_dir = args.data / "output"
     out_dir.mkdir(exist_ok=True)
     out_path = out_dir / ("preview.jpg" if args.dry_run else "current.jpg")
@@ -591,18 +641,22 @@ def main():
         return
 
     # Save the upload list even if a later step fails, so cleanup still knows about the file.
+    cleanup = (args.data / "cleanup.enabled").exists()
     try:
-        push_to_tv(cfg, out_path, state, (args.data / "cleanup.enabled").exists(), profile)
+        new_id = push_to_tv(cfg, out_path, state, cleanup, profile, show_at, bool(clock_only))
     finally:
         state_path.write_text(json.dumps(state, ensure_ascii=False, indent=1))
         profile_path.write_text(json.dumps(profile, ensure_ascii=False, indent=1))
-    state.update(
-        last_change=now.isoformat(),
-        band=ctx["band"],
-        weather=ctx["weather"],
-        kind=item.get("kind"),
-        history=(state.get("history", []) + [item["id"]])[-HISTORY_SIZE:],
-    )
+    if show_at and new_id:
+        state["clock_shown"] = show_at.isoformat()
+    if reason:
+        state.update(
+            last_change=now.isoformat(),
+            band=ctx["band"],
+            weather=ctx["weather"],
+            kind=item.get("kind"),
+            history=(state.get("history", []) + [item["id"]])[-HISTORY_SIZE:],
+        )
     state_path.write_text(json.dumps(state, ensure_ascii=False, indent=1))
 
 

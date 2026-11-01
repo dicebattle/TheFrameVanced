@@ -148,8 +148,7 @@
   "kind": "painting",
   "caption": "수확의 달, 조지 이네스",
   "times": [
-   "sunset",
-   "night"
+   "sunset"
   ],
   "seasons": [
    "autumn"
@@ -1346,8 +1345,7 @@
   "kind": "photo",
   "caption": "독일 쾰른의 저녁",
   "times": [
-   "sunset",
-   "night"
+   "sunset"
   ],
   "seasons": [
    "any"
@@ -1371,7 +1369,7 @@
   "kind": "photo",
   "caption": "독일 프랑크푸르트 뢰머 광장의 밤",
   "times": [
-   "night"
+   "sunset"
   ],
   "seasons": [
    "any"
@@ -1611,7 +1609,8 @@
   "kind": "painting",
   "caption": "가나가와 해변의 높은 파도, 가쓰시카 호쿠사이",
   "times": [
-   "any"
+   "morning",
+   "day"
   ],
   "seasons": [
    "any"
@@ -2111,8 +2110,7 @@
   "kind": "photo",
   "caption": "상하이 푸둥의 저녁",
   "times": [
-   "sunset",
-   "night"
+   "sunset"
   ],
   "seasons": [
    "any"
@@ -2184,8 +2182,7 @@
   "kind": "photo",
   "caption": "싱가포르 헬릭스 다리의 저녁",
   "times": [
-   "sunset",
-   "night"
+   "sunset"
   ],
   "seasons": [
    "any"
@@ -2233,8 +2230,7 @@
   "kind": "photo",
   "caption": "뉴욕 로어맨해튼의 저녁",
   "times": [
-   "sunset",
-   "night"
+   "sunset"
   ],
   "seasons": [
    "any"
@@ -2258,8 +2254,7 @@
   "kind": "photo",
   "caption": "뉴욕 맨해튼의 푸른 저녁",
   "times": [
-   "sunset",
-   "night"
+   "sunset"
   ],
   "seasons": [
    "any"
@@ -2405,8 +2400,7 @@
   "kind": "photo",
   "caption": "샌프란시스코의 저녁",
   "times": [
-   "sunset",
-   "night"
+   "sunset"
   ],
   "seasons": [
    "any"
