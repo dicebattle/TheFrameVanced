@@ -20,6 +20,7 @@ from flask import Flask, Response, abort, jsonify, request, send_from_directory
 from PIL import Image
 
 import frame
+import sources
 
 HERE = Path(__file__).resolve().parent
 SERVICE = "theframevanced"
@@ -31,6 +32,7 @@ USER_AGENT = {"User-Agent": "TheFrameVanced/0.1"}
 app = Flask(__name__, static_folder=None)
 data_dir = None
 write_lock = threading.Lock()
+source_status = {}
 
 
 def read_json(name, default):
@@ -93,7 +95,10 @@ def save_config():
     with write_lock:
         cfg = read_json("config.json", {})
         layout = body.pop("layout", None)
-        allowed = {"tv_host", "change_minutes", "min_weather_change_minutes"}
+        allowed = {"tv_host", "tv_inches", "change_minutes", "min_weather_change_minutes", "disabled_themes"}
+        if body.get("tv_host") not in (None, cfg.get("tv_host")):
+            # A different TV may have a different size: read it again from its model name.
+            cfg.pop("tv_inches", None)
         cfg.update({k: v for k, v in body.items() if k in allowed})
         if layout is not None:
             known = {k: v for k, v in layout.items() if k in frame.DEFAULT_LAYOUT}
@@ -153,8 +158,8 @@ def context():
 def preview():
     body = request.get_json()
     cfg = read_json("config.json", {})
-    layout = {**frame.DEFAULT_LAYOUT, **cfg.get("layout", {}), **body.get("layout", {})}
-    cfg["layout"] = layout
+    cfg["layout"] = {**frame.DEFAULT_LAYOUT, **cfg.get("layout", {}), **body.get("layout", {})}
+    layout = frame.effective_layout(cfg)
     item = find_item(body["image"])
     ctx = body["context"]
     image = frame.compose(item, ctx, cfg, data_dir).resize(PREVIEW_SIZE, Image.LANCZOS)
@@ -182,7 +187,7 @@ def thumb(item_id):
 @app.post("/api/library/<item_id>")
 def update_item(item_id):
     body = request.get_json()
-    allowed = {"enabled", "times", "seasons", "weather", "caption", "focus"}
+    allowed = {"enabled", "times", "seasons", "weather", "caption", "focus", "themes"}
     with write_lock:
         items = catalog()
         for item in items:
@@ -191,6 +196,61 @@ def update_item(item_id):
                 write_json("library/catalog.json", items)
                 return jsonify(ok=True)
     abort(404)
+
+
+def start_sync(source):
+    status = source_status[source["id"]] = {"running": True, "added": 0, "failed": 0, "error": None}
+
+    def run():
+        try:
+            status["added"], status["failed"] = sources.sync(
+                data_dir, source, write_lock, on_progress=lambda n: status.update(added=n)
+            )
+        except Exception as e:
+            status["error"] = str(e)[:200]
+        status["running"] = False
+
+    threading.Thread(target=run, daemon=True).start()
+
+
+@app.get("/api/sources")
+def list_sources():
+    counts = {}
+    for item in catalog():
+        counts[item.get("source_id")] = counts.get(item.get("source_id"), 0) + 1
+    rows = [{**s, "images": counts.get(s["id"], 0), "status": source_status.get(s["id"])} for s in sources.load_sources(data_dir)]
+    return jsonify(rows)
+
+
+@app.post("/api/sources")
+def create_source():
+    body = request.get_json()
+    try:
+        with write_lock:
+            source = sources.add_source(data_dir, body.get("name", ""), body.get("type", ""), body.get("location", ""), body.get("theme", ""))
+    except ValueError as e:
+        return jsonify(ok=False, error=str(e)), 400
+    start_sync(source)
+    return jsonify(ok=True, source=source)
+
+
+@app.post("/api/sources/<source_id>/sync")
+def resync_source(source_id):
+    source = next((s for s in sources.load_sources(data_dir) if s["id"] == source_id), None)
+    if source is None:
+        abort(404)
+    start_sync(source)
+    return jsonify(ok=True)
+
+
+@app.post("/api/sources/<source_id>/remove")
+def delete_source(source_id):
+    try:
+        sources.remove_source(data_dir, source_id, write_lock)
+    except ValueError as e:
+        return jsonify(ok=False, error=str(e)), 404
+    source_status.pop(source_id, None)
+    return jsonify(ok=True)
 
 
 def rest_info(host, timeout=3):
@@ -233,7 +293,8 @@ def art_info(host):
 
 @app.get("/api/tv")
 def tv_status():
-    host = read_json("config.json", {}).get("tv_host")
+    cfg = read_json("config.json", {})
+    host = cfg.get("tv_host")
     if not host:
         return jsonify(reachable=False, host=None, standby=False)
     info = rest_info(host)
@@ -243,7 +304,13 @@ def tv_status():
         info.update(art_info(host))
     except Exception as e:
         info["art_error"] = str(e)[:160]
-    return jsonify(reachable=True, **info)
+    inches = frame.inches_from_model(info["model"])
+    if inches and "tv_inches" not in cfg:
+        with write_lock:
+            fresh = read_json("config.json", {})
+            fresh["tv_inches"] = cfg["tv_inches"] = inches
+            write_json("config.json", fresh)
+    return jsonify(reachable=True, tv_inches=cfg.get("tv_inches"), **info)
 
 
 @app.post("/api/tv/discover")

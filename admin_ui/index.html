@@ -94,6 +94,7 @@ button, input, select { font: inherit; color: inherit; }
 .grid9 button { height: 22px; background: #e8e9e3; border: 0; cursor: pointer; }
 .grid9 button:hover { background: var(--brass-bright); }
 .swatches { display: flex; gap: 14px; }
+.swatches[hidden] { display: none; }
 .swatches label { display: flex; gap: 6px; align-items: center; font-size: 13px; color: var(--ink-soft); }
 input[type=color] { width: 30px; height: 24px; padding: 0; border: 1px solid var(--hair); background: none; }
 .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
@@ -115,6 +116,15 @@ dl.facts dd { margin: 0; font-family: var(--mono); font-size: 12.5px; word-break
 .switch b { font-weight: 600; font-size: 14px; }
 .switch small { grid-column: 2; color: var(--ink-soft); font-size: 12.5px; }
 .log { background: #20262a; color: #d7dbd6; font: 400 11.5px/1.5 var(--mono); padding: 10px; max-height: 190px; overflow: auto; white-space: pre-wrap; word-break: break-all; }
+.theme-list { display: flex; flex-wrap: wrap; gap: 5px; }
+.theme { background: #fff; border: 1px solid var(--hair); padding: 5px 10px; cursor: pointer; font-size: 13.5px; color: var(--ink-soft); }
+.theme b { font: 500 11.5px var(--mono); margin-left: 4px; font-weight: 400; }
+.theme[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+.source-row { padding: 8px 0; border-top: 1px solid var(--hair); font-size: 13px; }
+.source-row strong { display: block; font-weight: 600; }
+.source-row small { display: block; color: var(--ink-soft); word-break: break-all; }
+.source-row .row-actions { display: flex; gap: 12px; margin-top: 3px; }
+.source-row button { background: none; border: 0; padding: 2px 0; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; font-size: 12.5px; }
 .gallery { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .tile { position: relative; background: none; border: 0; padding: 0; text-align: left; cursor: pointer; }
 .tile img { display: block; width: 100%; aspect-ratio: 16/9; object-fit: cover; background: #e5e5df; }
@@ -178,7 +188,8 @@ dl.facts dd { margin: 0; font-family: var(--mono); font-size: 12.5px; word-break
         <label class="field"><span>굵기</span><select id="weight"><option value="Regular">보통</option><option value="Bold">굵게</option></select></label>
         <label class="field"><span>정렬</span><select id="align"><option value="left">왼쪽</option><option value="center">가운데</option><option value="right">오른쪽</option></select></label>
       </div>
-      <div class="swatches" style="margin-bottom:12px">
+      <label class="field"><span>글자색</span><select id="color_mode"><option value="auto">자동: 배경이 밝으면 검은 글자</option><option value="manual">직접 선택</option></select></label>
+      <div class="swatches" id="swatches" style="margin-bottom:12px">
         <label>첫째 줄 <input type="color" id="color"></label>
         <label>둘째 줄 <input type="color" id="caption_color"></label>
       </div>
@@ -192,8 +203,28 @@ dl.facts dd { margin: 0; font-family: var(--mono); font-size: 12.5px; word-break
     </div>
 
     <div class="panel" id="panel-images" role="tabpanel" hidden>
-      <h2>이미지 창고</h2>
-      <p class="hint">이미지를 누르면 미리보기에 표시됩니다. "액자에 사용"을 끄면 자동 교체에서 뺍니다.</p>
+      <h2>테마</h2>
+      <p class="hint">켜 둔 테마의 이미지만 액자에 나옵니다. 누르면 바로 저장됩니다.</p>
+      <div class="theme-list" id="themes"></div>
+      <div class="notice" id="themeNotice" aria-live="polite"></div>
+      <h2>이미지 소스 추가</h2>
+      <p class="hint">내 폴더나 인터넷의 이미지를 창고로 가져옵니다. 저작권을 확인한 이미지만 추가하세요.</p>
+      <form id="sourceForm">
+        <label class="field"><span>이름</span><input type="text" id="sourceName" placeholder="예: 가족 사진"></label>
+        <label class="field"><span>가져올 곳</span><select id="sourceType">
+          <option value="folder">서버의 폴더</option>
+          <option value="image">이미지 주소 한 개</option>
+          <option value="list">목록 주소 (JSON)</option>
+        </select></label>
+        <label class="field"><span id="sourceLocationLabel">폴더 경로</span><input type="text" id="sourceLocation" placeholder="/mnt/nas/photos"></label>
+        <label class="field"><span>테마</span><input type="text" id="sourceTheme" list="themeNames" placeholder="비우면 소스 이름을 씁니다"><datalist id="themeNames"></datalist></label>
+        <div class="actions" style="margin-top:0"><button class="btn primary" type="submit">가져오기</button></div>
+      </form>
+      <div class="notice" id="sourceNotice" aria-live="polite"></div>
+      <div id="sourceList"></div>
+      <h2>이미지</h2>
+      <label class="field"><span>보기</span><select id="galleryFilter"><option value="">전체</option></select></label>
+      <p class="hint">이미지를 누르면 미리보기에 표시됩니다. "액자에 사용"을 끄면 이 이미지만 뺍니다.</p>
       <div class="gallery" id="gallery"></div>
     </div>
 
@@ -206,6 +237,10 @@ dl.facts dd { margin: 0; font-family: var(--mono); font-size: 12.5px; word-break
       </div>
       <div class="notice" id="tvNotice" aria-live="polite"></div>
       <div id="tvFound"></div>
+      <h2>TV 크기</h2>
+      <label class="field"><span>인치</span><input type="number" id="tv_inches" min="32" max="115" step="1"></label>
+      <p class="hint">모델명에서 자동으로 읽습니다. 글자가 TV 크기와 상관없이 같은 실제 크기로 보이도록 맞춥니다.</p>
+      <div class="actions"><button class="btn primary" id="saveInches">크기 저장</button></div>
       <h2>TV 주소</h2>
       <label class="field"><span>IP 주소</span><input type="text" id="tv_host" inputmode="decimal"></label>
       <div class="actions"><button class="btn primary" id="saveHost">주소 저장</button></div>
@@ -244,7 +279,9 @@ const BANDS = { dawn: "새벽", morning: "아침", day: "낮", sunset: "노을",
 const WEATHER = { clear: "맑음", cloud: "흐림", rain: "비", snow: "눈", fog: "안개" };
 const TOKENS = { term: "절기", weather: "날씨", temp: "기온", title: "작품명" };
 const LAYOUT_RANGE = ["headline_size", "caption_size", "line_gap", "veil", "shadow"];
-const LAYOUT_OTHER = ["headline", "caption", "weight", "align", "color", "caption_color"];
+const LAYOUT_OTHER = ["headline", "caption", "weight", "align", "color_mode", "color", "caption_color"];
+const MM_PER_PIXEL = 0.432; // width of one 4K pixel on the 75 inch TV that sizes are stored for
+const SIZE_FIELDS = ["headline_size", "caption_size", "line_gap"];
 const S = { saved: "", layout: {}, ctx: null, real: null, image: null, box: null, canvas: [3840, 2160], seq: 0 };
 
 async function api(path, body) {
@@ -293,12 +330,12 @@ function placeHandle() {
   const h = $("handle");
   if (!S.box) { h.style.display = "none"; return; }
   h.style.display = "";
-  const pad = 14 / S.canvas[0];
   const [l, t, r, b] = S.box, [w, c] = S.canvas;
-  h.style.left = (l / w * 100 - pad * 100) + "%";
-  h.style.top = (t / c * 100 - pad * 170) + "%";
-  h.style.width = ((r - l) / w * 100 + pad * 200) + "%";
-  h.style.height = ((b - t) / c * 100 + pad * 340) + "%";
+  const padX = 30, padTop = 18, padBottom = 40; // the drawn glyphs sit lower than the font's size box
+  h.style.left = ((l - padX) / w * 100) + "%";
+  h.style.top = ((t - padTop) / c * 100) + "%";
+  h.style.width = ((r - l + padX * 2) / w * 100) + "%";
+  h.style.height = ((b - t + padTop + padBottom) / c * 100) + "%";
 }
 function moveBox(left, top) {
   const [l, t, r, b] = S.box, [w, h] = S.canvas;
@@ -354,14 +391,17 @@ function layoutChanged() {
 function bindLayout() {
   for (const id of LAYOUT_RANGE) {
     const el = $(id), out = $(id + "Out");
-    el.value = S.layout[id]; out.textContent = S.layout[id];
-    el.oninput = () => { S.layout[id] = +el.value; out.textContent = el.value; layoutChanged(); };
+    const show = () => { out.textContent = SIZE_FIELDS.includes(id) ? `약 ${Math.round(S.layout[id] * MM_PER_PIXEL)}mm` : S.layout[id]; };
+    el.value = S.layout[id]; show();
+    el.oninput = () => { S.layout[id] = +el.value; show(); layoutChanged(); };
   }
   for (const id of LAYOUT_OTHER) {
     const el = $(id); el.value = S.layout[id];
-    el.oninput = () => { S.layout[id] = el.value; layoutChanged(); };
+    el.oninput = () => { S.layout[id] = el.value; syncColorMode(); layoutChanged(); };
   }
+  syncColorMode();
 }
+function syncColorMode() { $("swatches").hidden = S.layout.color_mode === "auto"; }
 function setupTokens() {
   let last = $("headline");
   for (const id of ["headline", "caption"]) $(id).addEventListener("focus", (e) => last = e.target);
@@ -376,9 +416,36 @@ function setupTokens() {
     $("tokens").append(b);
   }
 }
-function renderGallery(items) {
+function allThemes() {
+  const counts = new Map();
+  for (const item of S.catalog) for (const t of item.themes || []) counts.set(t, (counts.get(t) || 0) + 1);
+  return [...counts].sort((a, b) => b[1] - a[1]);
+}
+function renderThemes() {
+  const host = $("themes"); host.innerHTML = "";
+  const names = allThemes();
+  for (const [name, count] of names) {
+    const b = document.createElement("button");
+    b.className = "theme"; b.setAttribute("aria-pressed", !S.disabled.includes(name));
+    b.append(name); const n = document.createElement("b"); n.textContent = count; b.append(n);
+    b.addEventListener("click", async () => {
+      const next = S.disabled.includes(name) ? S.disabled.filter((t) => t !== name) : [...S.disabled, name];
+      if (next.length === names.length) { notify("themeNotice", "테마를 하나 이상 켜 두세요.", "err"); return; }
+      S.disabled = next;
+      await api("/api/config", { disabled_themes: next });
+      notify("themeNotice", ""); renderThemes();
+    });
+    host.append(b);
+  }
+  const filter = $("galleryFilter"), current = filter.value;
+  filter.replaceChildren(new Option("전체", ""), ...names.map(([n, c]) => new Option(`${n} (${c})`, n)));
+  filter.value = names.some(([n]) => n === current) ? current : "";
+  $("themeNames").replaceChildren(...names.map(([n]) => new Option(n)));
+}
+function renderGallery() {
   const host = $("gallery"); host.innerHTML = "";
-  for (const item of items) {
+  const only = $("galleryFilter").value;
+  for (const item of S.catalog.filter((i) => !only || (i.themes || []).includes(only))) {
     const wrap = document.createElement("div");
     const b = document.createElement("button");
     b.className = "tile" + (item.enabled === false ? " off" : "");
@@ -386,7 +453,7 @@ function renderGallery(items) {
     b.innerHTML = `<img loading="lazy" alt=""><span></span><em></em>`;
     b.querySelector("img").src = `/api/thumb/${encodeURIComponent(item.id)}`;
     b.querySelector("span").textContent = item.caption || item.id;
-    b.querySelector("em").textContent = [item.kind === "painting" ? "명화" : "사진", ...(item.times || [])].join(" · ");
+    b.querySelector("em").textContent = (item.themes || []).join(" · ") || (item.kind === "painting" ? "명화" : "사진");
     b.addEventListener("click", () => { S.image = item.id; preview(); for (const t of host.querySelectorAll(".tile")) t.setAttribute("aria-pressed", t === b); });
     const use = document.createElement("label");
     use.className = "use";
@@ -398,6 +465,52 @@ function renderGallery(items) {
     });
     wrap.append(b, use); host.append(wrap);
   }
+}
+const SOURCE_TYPES = { folder: "폴더", image: "이미지 주소", list: "목록 주소" };
+let sourcePoll;
+async function refreshCatalog() {
+  const st = await api("/api/state");
+  S.catalog = st.catalog; renderThemes(); renderGallery();
+}
+async function refreshSources() {
+  const rows = await api("/api/sources");
+  const host = $("sourceList"); host.innerHTML = "";
+  const running = rows.some((r) => r.status?.running);
+  for (const r of rows) {
+    const row = document.createElement("div"); row.className = "source-row";
+    const st = r.status;
+    const state = st?.error ? `가져오지 못했습니다: ${st.error}` : st?.running ? `가져오는 중 (${st.added}장)` : st?.failed ? `이미지 ${r.images}장, ${st.failed}장 실패` : `이미지 ${r.images}장`;
+    row.innerHTML = `<strong></strong><small></small><small></small><div class="row-actions"><button type="button">다시 가져오기</button><button type="button">소스 빼기</button></div>`;
+    row.querySelector("strong").textContent = `${r.name} · ${r.theme}`;
+    row.querySelectorAll("small")[0].textContent = `${SOURCE_TYPES[r.type]}: ${r.location}`;
+    row.querySelectorAll("small")[1].textContent = state;
+    const [again, remove] = row.querySelectorAll("button");
+    again.addEventListener("click", async () => { await api(`/api/sources/${encodeURIComponent(r.id)}/sync`, {}); refreshSources(); });
+    remove.addEventListener("click", async () => {
+      if (!confirm(`${r.name} 소스와 창고에 복사된 이미지 ${r.images}장을 지웁니다. 원본 폴더나 사이트는 그대로 둡니다.`)) return;
+      await api(`/api/sources/${encodeURIComponent(r.id)}/remove`, {}); notify("sourceNotice", "소스를 뺐습니다.", "ok");
+      refreshSources(); refreshCatalog();
+    });
+    host.append(row);
+  }
+  clearTimeout(sourcePoll);
+  if (running) sourcePoll = setTimeout(refreshSources, 2000);
+  else if (S.sourcesRunning) refreshCatalog();
+  S.sourcesRunning = running;
+}
+function setupSources() {
+  const hints = { folder: ["폴더 경로", "/mnt/nas/photos"], image: ["이미지 주소", "https://example.com/photo.jpg"], list: ["목록 주소", "https://example.com/images.json"] };
+  $("sourceType").addEventListener("change", (e) => { const [label, ph] = hints[e.target.value]; $("sourceLocationLabel").textContent = label; $("sourceLocation").placeholder = ph; });
+  $("galleryFilter").addEventListener("change", renderGallery);
+  $("sourceForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const res = await fetch("/api/sources", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name: $("sourceName").value, type: $("sourceType").value, location: $("sourceLocation").value, theme: $("sourceTheme").value }) });
+    const out = await res.json();
+    if (!out.ok) { notify("sourceNotice", out.error, "err"); return; }
+    notify("sourceNotice", "이미지를 가져오는 중입니다.", "ok");
+    for (const id of ["sourceName", "sourceLocation", "sourceTheme"]) $(id).value = "";
+    refreshSources();
+  });
 }
 function setPill(state, text) { $("tvPill").dataset.state = state; $("tvPillText").textContent = text; }
 function facts(rows) {
@@ -419,7 +532,8 @@ async function refreshTv() {
     }
     const art = tv.art_mode === "on" ? "켜짐" : tv.art_mode === "off" ? "꺼짐" : "확인 못 함";
     setPill("on", `${tv.model || "TV"} · 아트모드 ${art}`);
-    facts([["주소", tv.host], ["모델", tv.model], ["더 프레임 지원", tv.frame ? "예" : "아니요"], ["전원", tv.power], ["연결", tv.network], ["아트모드", art], ["현재 작품", tv.current], ["Art API", tv.api_version], ["올린 사진", tv.uploaded]]);
+    if (tv.tv_inches) $("tv_inches").value = tv.tv_inches;
+    facts([["주소", tv.host], ["모델", tv.model], ["TV 크기", tv.tv_inches ? `${tv.tv_inches}인치` : "입력 필요"], ["더 프레임 지원", tv.frame ? "예" : "아니요"], ["전원", tv.power], ["연결", tv.network], ["아트모드", art], ["현재 작품", tv.current], ["Art API", tv.api_version], ["올린 사진", tv.uploaded]]);
     notify("tvNotice", tv.art_error ? `아트모드 정보를 읽지 못했습니다: ${tv.art_error}` : "", tv.art_error ? "err" : "ok");
   } catch (e) { notify("tvNotice", e.message, "err"); setPill("off", "상태 확인 실패"); }
 }
@@ -498,6 +612,10 @@ function setupActions() {
       host.append(row);
     }
   });
+  $("saveInches").addEventListener("click", async () => {
+    await api("/api/config", { tv_inches: +$("tv_inches").value });
+    notify("tvNotice", "TV 크기를 저장했습니다.", "ok"); preview();
+  });
   $("saveHost").addEventListener("click", async () => { await api("/api/config", { tv_host: $("tv_host").value.trim() }); refreshTv(); });
   $("saveSettings").addEventListener("click", async () => {
     await api("/api/config", { change_minutes: +$("change_minutes").value, min_weather_change_minutes: +$("min_weather_change_minutes").value });
@@ -515,17 +633,18 @@ function setupActions() {
 }
 async function load() {
   chips($("bandChips"), BANDS, "band"); chips($("weatherChips"), WEATHER, "weather");
-  setupDrag(); setupGrid9(); setupTokens(); setupActions(); setupRegion();
+  setupDrag(); setupGrid9(); setupTokens(); setupActions(); setupRegion(); setupSources();
   const st = await api("/api/state");
   S.layout = { ...st.layout }; S.saved = JSON.stringify(S.layout);
   S.real = await api("/api/context"); S.ctx = { ...S.real };
   const usable = st.catalog.filter((i) => i.enabled !== false);
   S.image = st.state.history?.at(-1) ?? usable[0]?.id ?? null;
-  for (const id of ["tv_host", "change_minutes", "min_weather_change_minutes"]) $(id).value = st.config[id] ?? "";
+  for (const id of ["tv_host", "tv_inches", "change_minutes", "min_weather_change_minutes"]) $(id).value = st.config[id] ?? "";
   $("region").value = st.config.location_label ?? "";
   showRegion(st.config.location_detail ?? st.config.location_label, st.config.timezone);
   $("timerToggle").checked = st.timer; $("cleanupToggle").checked = st.cleanup;
-  bindLayout(); syncChips(); renderGallery(st.catalog); drawPreview(); refreshTv();
+  S.catalog = st.catalog; S.disabled = st.config.disabled_themes ?? [];
+  bindLayout(); syncChips(); renderThemes(); renderGallery(); refreshSources(); drawPreview(); refreshTv();
 }
 load().catch((e) => notify("textNotice", e.message, "err"));
 </script>

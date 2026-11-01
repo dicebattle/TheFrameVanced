@@ -54,7 +54,9 @@ def main():
                 image = image.resize((MAX_WIDTH, height), Image.LANCZOS)
             image.save(target, quality=92, optimize=True)
             print(f"saved {slug} {image.size}", flush=True)
-            time.sleep(PAUSE_SECONDS)
+            # Wikimedia limits downloads; the museum and NASA servers do not need this wait.
+            if "wikimedia.org" in entry["url"]:
+                time.sleep(PAUSE_SECONDS)
         kept = {"enabled": catalog[slug]["enabled"]} if "enabled" in catalog.get(slug, {}) else {}
         catalog[slug] = {**entry, **kept, "file": f"images/{slug}.jpg"}
         catalog_path.write_text(json.dumps(list(catalog.values()), ensure_ascii=False, indent=1))

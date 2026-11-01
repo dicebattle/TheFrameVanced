@@ -27,16 +27,31 @@ FONT_PATHS = {
     "Bold": "/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc",
 }
 FONT_INDEX_KR = 1
+# Text sizes are stored for a 75 inch TV and scaled so the printed size stays the same on any TV.
+REFERENCE_INCHES = 75
+# Keeps text inside the screen edge, whatever its size.
+EDGE_MARGIN = 96
+# Relative luminance (0-1) from which dark text reads better than light text.
+BRIGHT_BACKGROUND = 0.30
+LINEAR_LUT = [
+    round(255 * (c / 12.92 if c <= 0.04045 else ((c + 0.055) / 1.055) ** 2.4))
+    for c in (i / 255 for i in range(256))
+] * 3
+TEXT_TONES = {
+    "light": {"color": "#F6F4EE", "caption_color": "#ECEAE4", "veil": (12, 14, 18), "shadow": (0, 0, 0)},
+    "dark": {"color": "#14171A", "caption_color": "#2B2F34", "veil": (248, 247, 243), "shadow": (255, 255, 255)},
+}
 DEFAULT_LAYOUT = {
     "x": 0.031,
-    "y": 0.895,
+    "y": 0.865,
     "align": "left",
-    "headline": "{term} · {weather} {temp}°",
+    "headline": "{weather} {temp}°",
     "caption": "{title}",
-    "headline_size": 58,
-    "caption_size": 38,
+    "headline_size": 92,
+    "caption_size": 56,
     "weight": "Regular",
-    "line_gap": 28,
+    "line_gap": 34,
+    "color_mode": "auto",
     "color": "#F6F4EE",
     "caption_color": "#ECEAE4",
     "veil": 1.0,
@@ -151,8 +166,15 @@ def score(item, ctx, last_kind):
     return total + random.uniform(0, 1.5)
 
 
-def pick_image(catalog, ctx, state):
-    catalog = [i for i in catalog if i.get("enabled", True)]
+def in_chosen_themes(item, disabled):
+    themes = item.get("themes") or []
+    return not themes or any(t not in disabled for t in themes)
+
+
+def pick_image(catalog, ctx, state, disabled_themes=()):
+    catalog = [i for i in catalog if i.get("enabled", True) and in_chosen_themes(i, disabled_themes)]
+    if not catalog:
+        raise SystemExit("no images left: turn on a theme or an image in the admin page")
     recent = set(state.get("history", []))
     scored = [(score(i, ctx, state.get("kind")), i) for i in catalog if i["id"] not in recent]
     scored = [(s, i) for s, i in scored if s is not None]
@@ -195,8 +217,8 @@ def caption_rows(lines, layout):
     path = FONT_PATHS[layout["weight"]]
     big = ImageFont.truetype(path, layout["headline_size"], index=FONT_INDEX_KR)
     small = ImageFont.truetype(path, layout["caption_size"], index=FONT_INDEX_KR)
-    pairs = ((lines[0], big, layout["color"]), (lines[1], small, layout["caption_color"]))
-    return [(t, f, c, f.size) for t, f, c in pairs if t.strip()]
+    pairs = ((lines[0], big, "color"), (lines[1], small, "caption_color"))
+    return [(t, f, role, f.size) for t, f, role in pairs if t.strip()]
 
 
 def caption_box(rows, layout):
@@ -204,9 +226,40 @@ def caption_box(rows, layout):
     block_h = sum(r[3] for r in rows) + layout["line_gap"] * (len(rows) - 1)
     block_w = max(int(r[1].getlength(r[0])) for r in rows)
     origin = {"left": 0.0, "center": 0.5, "right": 1.0}[layout["align"]]
-    left = max(0, min(int(layout["x"] * CANVAS[0] - block_w * origin), CANVAS[0] - block_w))
-    top = max(0, min(int(layout["y"] * CANVAS[1]), CANVAS[1] - block_h))
+    left = int(layout["x"] * CANVAS[0] - block_w * origin)
+    left = max(EDGE_MARGIN, min(left, CANVAS[0] - block_w - EDGE_MARGIN))
+    top = int(layout["y"] * CANVAS[1])
+    top = max(EDGE_MARGIN, min(top, CANVAS[1] - block_h - EDGE_MARGIN))
     return (left, top, left + block_w, top + block_h), origin
+
+
+def relative_luminance(image, box):
+    """Perceived brightness of an area, 0 for black and 1 for white."""
+    r, g, b = ImageStat.Stat(image.crop(box).resize((96, 24)).point(LINEAR_LUT)).mean
+    return (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255
+
+
+def veil_strength(image, box, dark_text):
+    """How strongly to soften the area behind the text, 0-255 before the user's setting."""
+    gray = image.crop(box).convert("L")
+    if dark_text:
+        return min(170, max(0, 235 - ImageStat.Stat(gray).mean[0]) * 1.2)
+    # Scattered lights hardly move the average but still fight with light text, so use the
+    # brightest few percent. Plain dark walls stay below the limit and get no visible edge.
+    histogram = gray.histogram()
+    remaining = gray.width * gray.height * 0.03
+    for level in range(255, -1, -1):
+        remaining -= histogram[level]
+        if remaining <= 0:
+            break
+    return min(190, max(0, level - 70) * 1.3)
+
+
+def text_style(image, box, layout):
+    if layout["color_mode"] == "auto":
+        bright = relative_luminance(image, box) >= BRIGHT_BACKGROUND
+        return TEXT_TONES["dark" if bright else "light"]
+    return {**TEXT_TONES["light"], "color": layout["color"], "caption_color": layout["caption_color"]}
 
 
 def draw_caption(image, lines, layout):
@@ -216,32 +269,33 @@ def draw_caption(image, lines, layout):
     box, origin = caption_box(rows, layout)
     left, top, right, _ = box
     block_w = right - left
+    style = text_style(image, box, layout)
+    dark_text = style is TEXT_TONES["dark"]
 
     if layout["veil"] > 0:
-        # A soft dark veil keeps light text readable without looking like a label.
-        luminance = ImageStat.Stat(image.crop(box).convert("L")).mean[0]
+        # A soft veil keeps the text readable without looking like a label.
+        strength = min(190, veil_strength(image, box, dark_text) * layout["veil"])
         veil = Image.new("L", CANVAS, 0)
         veil_box = (box[0] - 90, box[1] - 70, box[2] + 90, box[3] + 60)
-        # Already dark areas get no veil, otherwise its edge shows up on plain walls.
-        strength = min(190, max(0, luminance - 45) * 1.3 * layout["veil"])
         ImageDraw.Draw(veil).rectangle(veil_box, fill=int(strength))
         veil = veil.filter(ImageFilter.GaussianBlur(70))
-        image = Image.composite(Image.new("RGB", CANVAS, (12, 14, 18)), image, veil)
+        image = Image.composite(Image.new("RGB", CANVAS, style["veil"]), image, veil)
 
     positions = []
     y = top
-    for text, font, color, size in rows:
+    for text, font, role, size in rows:
         x = left + int((block_w - font.getlength(text)) * origin)
-        positions.append((x, y, text, font, color))
+        positions.append((x, y, text, font, style[role]))
         y += size + layout["line_gap"]
 
     if layout["shadow"] > 0:
         shadow = Image.new("L", CANVAS, 0)
         d = ImageDraw.Draw(shadow)
+        fill = layout["shadow"] // 2 if dark_text else layout["shadow"]
         for x, y, text, font, _ in positions:
-            d.text((x, y), text, fill=layout["shadow"], font=font)
+            d.text((x, y), text, fill=fill, font=font)
         shadow = shadow.filter(ImageFilter.GaussianBlur(6))
-        image = Image.composite(Image.new("RGB", CANVAS, (0, 0, 0)), image, shadow)
+        image = Image.composite(Image.new("RGB", CANVAS, style["shadow"]), image, shadow)
 
     d = ImageDraw.Draw(image)
     for x, y, text, font, color in positions:
@@ -265,8 +319,23 @@ def hang_on_wall(image):
     return wall
 
 
-def compose(item, ctx, cfg, data_dir):
+def inches_from_model(model):
+    """Samsung model names carry the size after the region letters, as in QE55LS03."""
+    match = re.match(r"[A-Z]{2}(\d{2})", model or "")
+    inches = int(match[1]) if match else None
+    return inches if inches and inches >= 32 else None
+
+
+def effective_layout(cfg):
     layout = {**DEFAULT_LAYOUT, **cfg.get("layout", {})}
+    scale = REFERENCE_INCHES / (cfg.get("tv_inches") or REFERENCE_INCHES)
+    for key in ("headline_size", "caption_size", "line_gap"):
+        layout[key] = round(layout[key] * scale)
+    return layout
+
+
+def compose(item, ctx, cfg, data_dir):
+    layout = effective_layout(cfg)
     with Image.open(data_dir / "library" / item["file"]) as src:
         image = src.convert("RGB")
     if item.get("fit") == "mat":
@@ -368,7 +437,7 @@ def main():
     if args.image:
         item = next(i for i in catalog if i["id"] == args.image)
     else:
-        item = pick_image(catalog, ctx, state)
+        item = pick_image(catalog, ctx, state, cfg.get("disabled_themes", []))
     print(f'{reason}: {item["id"]}', flush=True)
     out_dir = args.data / "output"
     out_dir.mkdir(exist_ok=True)
