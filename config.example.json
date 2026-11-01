@@ -1,0 +1,9 @@
+{
+ "tv_host": "192.168.0.10",
+ "location_label": "서울",
+ "latitude": 37.5665,
+ "longitude": 126.978,
+ "timezone": "Asia/Seoul",
+ "change_minutes": 180,
+ "min_weather_change_minutes": 60
+}

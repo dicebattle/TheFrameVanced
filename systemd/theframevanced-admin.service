@@ -1,0 +1,11 @@
+[Unit]
+Description=TheFrameVanced admin page
+After=network-online.target
+
+[Service]
+ExecStart=%h/TheFrameVanced/.venv/bin/python -W ignore %h/TheFrameVanced/admin.py --data %h/TheFrameVanced/data
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target

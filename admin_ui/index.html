@@ -1,0 +1,533 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TheFrameVanced</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap">
+<style>
+:root {
+  --wall: #c3c7c0; --wall-ink: #20262a; --wall-soft: rgba(32,38,42,.62);
+  --paper: #f6f6f2; --ink: #1d2326; --ink-soft: #5c6468; --hair: #d9dad3;
+  --brass: #8a6d33; --brass-bright: #b08f4a; --ok: #2f7a5f; --warn: #b4572f;
+  --serif: "Gowun Batang", serif;
+  --sans: "IBM Plex Sans KR", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+body[data-band="dawn"]    { --wall: #9d9cb0; --wall-ink: #1f2030; --wall-soft: rgba(31,32,48,.66); }
+body[data-band="morning"] { --wall: #cdd3c6; }
+body[data-band="day"]     { --wall: #c3c7c0; }
+body[data-band="sunset"]  { --wall: #b78a6c; --wall-ink: #2a1a10; --wall-soft: rgba(42,26,16,.7); }
+body[data-band="night"]   { --wall: #2b3240; --wall-ink: #e9e6dd; --wall-soft: rgba(233,230,221,.68); }
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body {
+  background: var(--wall); color: var(--wall-ink); font: 15px/1.55 var(--sans);
+  transition: background-color .9s ease, color .9s ease;
+}
+button, input, select { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--brass-bright); outline-offset: 2px; }
+.masthead { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding: 18px 32px 0; }
+.wordmark { font: 700 22px/1.2 var(--serif); letter-spacing: .01em; margin: 0; }
+.tv-pill { font: 500 13px/1.3 var(--mono); color: var(--wall-soft); display: flex; align-items: center; gap: 8px; }
+.tv-pill i { width: 9px; height: 9px; border-radius: 50%; background: #8d9296; flex: none; }
+.tv-pill[data-state="on"] i { background: var(--ok); }
+.tv-pill[data-state="standby"] i { background: var(--brass-bright); }
+.tv-pill[data-state="off"] i { background: var(--warn); }
+
+.room { display: grid; grid-template-columns: minmax(0, 1fr) 400px; gap: 32px; padding: 20px 32px 32px; align-items: start; }
+.wall { min-width: 0; }
+
+/* The frame itself: a slim dark bezel with a shadow cast on the wall. */
+.frame {
+  position: relative; aspect-ratio: 16 / 9; background: #111; padding: 9px;
+  border-radius: 2px; box-shadow: 0 2px 3px rgba(0,0,0,.35), 0 28px 44px -18px rgba(0,0,0,.5);
+}
+.frame .screen { position: relative; width: 100%; height: 100%; overflow: hidden; background: #1a1c1e; }
+.frame img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.frame .busy {
+  position: absolute; top: 12px; right: 12px; font: 500 12px var(--mono); color: #fff;
+  background: rgba(0,0,0,.55); padding: 3px 8px; border-radius: 2px; opacity: 0; transition: opacity .2s;
+}
+.frame.loading .busy { opacity: 1; }
+#handle {
+  position: absolute; cursor: grab; touch-action: none; border: 1px dashed rgba(255,255,255,0);
+  transition: border-color .15s, background-color .15s;
+}
+#handle:hover, #handle.dragging, #handle:focus-visible { border-color: rgba(255,255,255,.85); background: rgba(255,255,255,.06); }
+#handle.dragging { cursor: grabbing; }
+
+.lighting { display: flex; flex-wrap: wrap; gap: 14px 28px; margin-top: 24px; align-items: end; }
+.lighting fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
+.lighting legend { font-size: 12.5px; color: var(--wall-soft); padding: 0; margin-bottom: 5px; }
+.chips { display: flex; flex-wrap: wrap; gap: 2px; }
+.chip {
+  background: none; border: 1px solid var(--wall-soft); padding: 4px 11px; cursor: pointer;
+  color: var(--wall-ink); font-size: 13.5px; line-height: 1.4;
+}
+.chip[aria-pressed="true"] { background: var(--wall-ink); color: var(--wall); border-color: var(--wall-ink); }
+.link-btn { background: none; border: 0; padding: 4px 0; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; color: inherit; font-size: 13.5px; }
+.temp-input { width: 72px; background: none; border: 1px solid var(--wall-soft); padding: 4px 8px; font: 500 13.5px var(--mono); }
+
+/* Settings live on a museum wall label. */
+.label-card { background: var(--paper); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.25), 0 12px 24px -14px rgba(0,0,0,.4); }
+.tabs { display: flex; border-bottom: 1px solid var(--hair); }
+.tab { flex: 1; background: none; border: 0; padding: 12px 4px 10px; cursor: pointer; color: var(--ink-soft); font-size: 14px; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+.tab[aria-selected="true"] { color: var(--ink); font-weight: 600; border-bottom-color: var(--brass); }
+.panel { padding: 18px 20px 20px; max-height: calc(100vh - 200px); overflow-y: auto; }
+.panel[hidden] { display: none; }
+.panel h2 { font: 700 16px/1.3 var(--serif); margin: 22px 0 10px; }
+.panel h2:first-child { margin-top: 0; }
+.hint { font-size: 12.5px; color: var(--ink-soft); margin: 4px 0 10px; }
+.field { display: grid; gap: 4px; margin-bottom: 12px; }
+.field > span { font-size: 13px; color: var(--ink-soft); display: flex; justify-content: space-between; gap: 10px; }
+.field output { font: 500 12.5px var(--mono); color: var(--ink); }
+.field input[type=text], .field input[type=number], .field select {
+  width: 100%; background: #fff; border: 1px solid var(--hair); padding: 7px 9px; border-radius: 0;
+}
+.field input[type=range] { width: 100%; accent-color: var(--brass); }
+.pair { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.tokens { display: flex; flex-wrap: wrap; gap: 4px; margin: -4px 0 12px; }
+.token { background: none; border: 1px solid var(--hair); padding: 1px 7px; font: 400 12px var(--mono); cursor: pointer; color: var(--ink-soft); }
+.grid9 { display: grid; grid-template-columns: repeat(3, 34px); gap: 3px; }
+.grid9 button { height: 22px; background: #e8e9e3; border: 0; cursor: pointer; }
+.grid9 button:hover { background: var(--brass-bright); }
+.swatches { display: flex; gap: 14px; }
+.swatches label { display: flex; gap: 6px; align-items: center; font-size: 13px; color: var(--ink-soft); }
+input[type=color] { width: 30px; height: 24px; padding: 0; border: 1px solid var(--hair); background: none; }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.btn { background: #fff; border: 1px solid var(--ink); color: var(--ink); padding: 8px 14px; cursor: pointer; font-size: 14px; }
+.btn.primary { background: var(--ink); color: var(--paper); }
+.btn:disabled { opacity: .45; cursor: default; }
+.notice { font-size: 13px; margin-top: 10px; min-height: 1.5em; color: var(--ink-soft); word-break: break-word; }
+.notice[data-kind="ok"] { color: var(--ok); }
+.notice[data-kind="err"] { color: var(--warn); }
+dl.facts { display: grid; grid-template-columns: auto 1fr; gap: 3px 14px; margin: 0 0 12px; font-size: 13.5px; }
+dl.facts dt { color: var(--ink-soft); }
+dl.facts dd { margin: 0; font-family: var(--mono); font-size: 12.5px; word-break: break-all; }
+.search { display: flex; gap: 6px; }
+.search input { flex: 1; min-width: 0; background: #fff; border: 1px solid var(--hair); padding: 7px 9px; }
+.region-now { font-size: 13px; margin: 8px 0 0; }
+.tv-row { display: flex; justify-content: space-between; gap: 8px; align-items: center; padding: 7px 0; border-top: 1px solid var(--hair); font-size: 13px; }
+.switch { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; align-items: start; padding: 10px 0; border-top: 1px solid var(--hair); cursor: pointer; }
+.switch input { margin-top: 4px; accent-color: var(--brass); width: 16px; height: 16px; }
+.switch b { font-weight: 600; font-size: 14px; }
+.switch small { grid-column: 2; color: var(--ink-soft); font-size: 12.5px; }
+.log { background: #20262a; color: #d7dbd6; font: 400 11.5px/1.5 var(--mono); padding: 10px; max-height: 190px; overflow: auto; white-space: pre-wrap; word-break: break-all; }
+.gallery { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.tile { position: relative; background: none; border: 0; padding: 0; text-align: left; cursor: pointer; }
+.tile img { display: block; width: 100%; aspect-ratio: 16/9; object-fit: cover; background: #e5e5df; }
+.tile[aria-pressed="true"] img { outline: 3px solid var(--brass); outline-offset: -3px; }
+.tile.off img { opacity: .3; }
+.tile span { display: block; font-size: 12px; margin-top: 3px; line-height: 1.35; }
+.tile em { font: 400 11px var(--mono); color: var(--ink-soft); font-style: normal; display: block; }
+.use { display: flex; gap: 6px; align-items: center; font-size: 12px; margin-top: 2px; color: var(--ink-soft); }
+@media (max-width: 980px) {
+  .room { grid-template-columns: minmax(0, 1fr); padding: 16px; gap: 20px; }
+  .masthead { padding: 14px 16px 0; flex-wrap: wrap; }
+  .panel { max-height: none; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body data-band="day">
+<header class="masthead">
+  <h1 class="wordmark">TheFrameVanced</h1>
+  <div class="tv-pill" id="tvPill" data-state="unknown"><i></i><span id="tvPillText">TV 확인 중</span></div>
+</header>
+
+<main class="room">
+  <section class="wall" aria-label="미리보기">
+    <div class="frame" id="frame">
+      <div class="screen" id="screen">
+        <img id="art" alt="TV에 표시될 화면 미리보기">
+        <div id="handle" role="button" tabindex="0" aria-label="글자 위치. 끌어서 옮기거나 화살표 키로 움직입니다"></div>
+      </div>
+      <div class="busy">그리는 중</div>
+    </div>
+    <div class="lighting">
+      <fieldset><legend>시간대</legend><div class="chips" id="bandChips"></div></fieldset>
+      <fieldset><legend>날씨</legend><div class="chips" id="weatherChips"></div></fieldset>
+      <label><span style="display:block;font-size:12.5px;color:var(--wall-soft);margin-bottom:5px">기온</span><input class="temp-input" id="temp" type="number" aria-label="미리보기 기온"></label>
+      <button class="link-btn" id="useReal">지금 날씨로 되돌리기</button>
+    </div>
+  </section>
+
+  <aside class="label-card">
+    <div class="tabs" role="tablist">
+      <button class="tab" role="tab" data-tab="text" aria-selected="true">글자</button>
+      <button class="tab" role="tab" data-tab="images" aria-selected="false">이미지</button>
+      <button class="tab" role="tab" data-tab="tv" aria-selected="false">TV</button>
+      <button class="tab" role="tab" data-tab="auto" aria-selected="false">자동 교체</button>
+    </div>
+
+    <div class="panel" id="panel-text" role="tabpanel">
+      <h2>들어갈 내용</h2>
+      <label class="field"><span>첫째 줄</span><input type="text" id="headline" data-tokens></label>
+      <label class="field"><span>둘째 줄</span><input type="text" id="caption" data-tokens></label>
+      <div class="tokens" id="tokens"></div>
+      <h2>위치</h2>
+      <p class="hint">액자 안의 글자를 직접 끌어서 옮길 수 있습니다.</p>
+      <div class="grid9" id="grid9" aria-label="빠른 위치"></div>
+      <h2>모양</h2>
+      <label class="field"><span>첫째 줄 크기 <output id="headline_sizeOut"></output></span><input type="range" id="headline_size" min="28" max="140" step="2"></label>
+      <label class="field"><span>둘째 줄 크기 <output id="caption_sizeOut"></output></span><input type="range" id="caption_size" min="20" max="90" step="2"></label>
+      <label class="field"><span>줄 간격 <output id="line_gapOut"></output></span><input type="range" id="line_gap" min="0" max="80" step="2"></label>
+      <div class="pair">
+        <label class="field"><span>굵기</span><select id="weight"><option value="Regular">보통</option><option value="Bold">굵게</option></select></label>
+        <label class="field"><span>정렬</span><select id="align"><option value="left">왼쪽</option><option value="center">가운데</option><option value="right">오른쪽</option></select></label>
+      </div>
+      <div class="swatches" style="margin-bottom:12px">
+        <label>첫째 줄 <input type="color" id="color"></label>
+        <label>둘째 줄 <input type="color" id="caption_color"></label>
+      </div>
+      <label class="field"><span>글자 뒤 어둡게 <output id="veilOut"></output></span><input type="range" id="veil" min="0" max="1.6" step="0.1"></label>
+      <label class="field"><span>글자 그림자 <output id="shadowOut"></output></span><input type="range" id="shadow" min="0" max="255" step="5"></label>
+      <div class="actions">
+        <button class="btn primary" id="saveLayout" disabled>레이아웃 저장</button>
+        <button class="btn" id="sendTv">지금 날씨로 TV에 보내기</button>
+      </div>
+      <div class="notice" id="textNotice" aria-live="polite"></div>
+    </div>
+
+    <div class="panel" id="panel-images" role="tabpanel" hidden>
+      <h2>이미지 창고</h2>
+      <p class="hint">이미지를 누르면 미리보기에 표시됩니다. "액자에 사용"을 끄면 자동 교체에서 뺍니다.</p>
+      <div class="gallery" id="gallery"></div>
+    </div>
+
+    <div class="panel" id="panel-tv" role="tabpanel" hidden>
+      <h2>연결 상태</h2>
+      <dl class="facts" id="tvFacts"></dl>
+      <div class="actions" style="margin-top:0">
+        <button class="btn" id="tvRefresh">다시 확인</button>
+        <button class="btn" id="tvDiscover">네트워크에서 찾기</button>
+      </div>
+      <div class="notice" id="tvNotice" aria-live="polite"></div>
+      <div id="tvFound"></div>
+      <h2>TV 주소</h2>
+      <label class="field"><span>IP 주소</span><input type="text" id="tv_host" inputmode="decimal"></label>
+      <div class="actions"><button class="btn primary" id="saveHost">주소 저장</button></div>
+      <p class="hint">공유기에서 이 주소를 고정해 두면 주소가 바뀌어 연결이 끊기는 일을 막을 수 있습니다.</p>
+    </div>
+
+    <div class="panel" id="panel-auto" role="tabpanel" hidden>
+      <h2>지역</h2>
+      <p class="hint">날씨와 일출·일몰 시각을 가져올 지역입니다. 화면에는 표시되지 않습니다.</p>
+      <form class="search" id="regionForm">
+        <input type="text" id="region" aria-label="지역 이름" placeholder="예: 수지구, 강남역, 제주">
+        <button class="btn" type="submit" id="regionFind">찾기</button>
+      </form>
+      <p class="region-now" id="regionNow"></p>
+      <div class="notice" id="regionNotice" aria-live="polite"></div>
+      <div id="regionList"></div>
+      <h2>교체 주기</h2>
+      <div class="pair">
+        <label class="field"><span>기본 간격(분)</span><input type="number" min="30" step="10" id="change_minutes"></label>
+        <label class="field"><span>날씨 변화 반영 최소 간격(분)</span><input type="number" min="10" step="10" id="min_weather_change_minutes"></label>
+      </div>
+      <div class="actions" style="margin-top:0"><button class="btn primary" id="saveSettings">설정 저장</button></div>
+      <div class="notice" id="autoNotice" aria-live="polite"></div>
+      <h2>자동 실행</h2>
+      <label class="switch"><input type="checkbox" id="timerToggle"><b>자동 교체 켜기</b><small>10분마다 확인하고, 시간대나 날씨가 바뀌거나 기본 간격이 지나면 그림을 바꿉니다. TV가 대기 상태면 건너뜁니다.</small></label>
+      <label class="switch"><input type="checkbox" id="cleanupToggle"><b>이전 이미지 자동 삭제</b><small>새 이미지가 화면에 표시된 것을 확인한 뒤, 이 프로그램이 올린 이전 이미지를 TV에서 영구 삭제합니다. 직접 올린 사진과 기본 작품은 지우지 않습니다.</small></label>
+      <h2>최근 기록</h2>
+      <div class="log" id="log">기록이 없습니다</div>
+    </div>
+  </aside>
+</main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const BANDS = { dawn: "새벽", morning: "아침", day: "낮", sunset: "노을", night: "밤" };
+const WEATHER = { clear: "맑음", cloud: "흐림", rain: "비", snow: "눈", fog: "안개" };
+const TOKENS = { term: "절기", weather: "날씨", temp: "기온", title: "작품명" };
+const LAYOUT_RANGE = ["headline_size", "caption_size", "line_gap", "veil", "shadow"];
+const LAYOUT_OTHER = ["headline", "caption", "weight", "align", "color", "caption_color"];
+const S = { saved: "", layout: {}, ctx: null, real: null, image: null, box: null, canvas: [3840, 2160], seq: 0 };
+
+async function api(path, body) {
+  const opts = body === undefined ? {} : { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) };
+  const res = await fetch(path, opts);
+  if (!res.ok) throw new Error(`요청 실패 (${res.status})`);
+  return res.json();
+}
+function notify(id, text, kind) { const el = $(id); el.textContent = text; el.dataset.kind = kind || ""; }
+function chips(host, map, key) {
+  host.innerHTML = "";
+  for (const [value, label] of Object.entries(map)) {
+    const b = document.createElement("button");
+    b.className = "chip"; b.textContent = label; b.dataset.value = value;
+    b.addEventListener("click", () => {
+      S.ctx[key] = value;
+      if (key === "weather") S.ctx.weather_label = label;
+      syncChips(); preview();
+    });
+    host.append(b);
+  }
+}
+function syncChips() {
+  for (const b of $("bandChips").children) b.setAttribute("aria-pressed", b.dataset.value === S.ctx.band);
+  for (const b of $("weatherChips").children) b.setAttribute("aria-pressed", b.dataset.value === S.ctx.weather);
+  $("temp").value = S.ctx.temperature;
+  document.body.dataset.band = S.ctx.band;
+}
+
+let previewTimer;
+function preview() { clearTimeout(previewTimer); previewTimer = setTimeout(drawPreview, 220); }
+async function drawPreview() {
+  if (!S.image) return;
+  const seq = ++S.seq;
+  $("frame").classList.add("loading");
+  try {
+    const out = await api("/api/preview", { image: S.image, layout: S.layout, context: S.ctx });
+    if (seq !== S.seq) return;
+    $("art").src = "data:image/jpeg;base64," + out.image;
+    S.box = out.box; S.canvas = out.canvas;
+    placeHandle();
+  } catch (e) { notify("textNotice", e.message, "err"); }
+  if (seq === S.seq) $("frame").classList.remove("loading");
+}
+function placeHandle() {
+  const h = $("handle");
+  if (!S.box) { h.style.display = "none"; return; }
+  h.style.display = "";
+  const pad = 14 / S.canvas[0];
+  const [l, t, r, b] = S.box, [w, c] = S.canvas;
+  h.style.left = (l / w * 100 - pad * 100) + "%";
+  h.style.top = (t / c * 100 - pad * 170) + "%";
+  h.style.width = ((r - l) / w * 100 + pad * 200) + "%";
+  h.style.height = ((b - t) / c * 100 + pad * 340) + "%";
+}
+function moveBox(left, top) {
+  const [l, t, r, b] = S.box, [w, h] = S.canvas;
+  const bw = r - l, bh = b - t;
+  left = Math.max(0, Math.min(left, w - bw)); top = Math.max(0, Math.min(top, h - bh));
+  const origin = { left: 0, center: .5, right: 1 }[S.layout.align];
+  S.layout.x = +((left + bw * origin) / w).toFixed(4);
+  S.layout.y = +(top / h).toFixed(4);
+  S.box = [left, top, left + bw, top + bh];
+  placeHandle(); layoutChanged();
+}
+function setupDrag() {
+  const h = $("handle"); let start = null;
+  h.addEventListener("pointerdown", (e) => {
+    h.setPointerCapture(e.pointerId); h.classList.add("dragging");
+    start = { x: e.clientX, y: e.clientY, box: [...S.box] };
+  });
+  h.addEventListener("pointermove", (e) => {
+    if (!start) return;
+    const scale = S.canvas[0] / $("screen").clientWidth;
+    moveBox(start.box[0] + (e.clientX - start.x) * scale, start.box[1] + (e.clientY - start.y) * scale);
+  });
+  const end = () => { start = null; h.classList.remove("dragging"); };
+  h.addEventListener("pointerup", end); h.addEventListener("pointercancel", end);
+  h.addEventListener("keydown", (e) => {
+    const step = e.shiftKey ? 80 : 20;
+    const d = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step] }[e.key];
+    if (!d || !S.box) return;
+    e.preventDefault(); moveBox(S.box[0] + d[0], S.box[1] + d[1]);
+  });
+}
+function setupGrid9() {
+  const cols = [["left", .031], ["center", .5], ["right", .969]];
+  const rows = ["top", "middle", "bottom"];
+  for (const row of rows) for (const [align, x] of cols) {
+    const b = document.createElement("button");
+    b.title = `${row} ${align}`;
+    b.setAttribute("aria-label", `${{ top: "위", middle: "가운데", bottom: "아래" }[row]} ${{ left: "왼쪽", center: "가운데", right: "오른쪽" }[align]}`);
+    b.addEventListener("click", () => {
+      S.layout.align = align; S.layout.x = x; $("align").value = align;
+      const bh = S.box ? (S.box[3] - S.box[1]) / S.canvas[1] : .1;
+      S.layout.y = { top: .055, middle: +(.5 - bh / 2).toFixed(4), bottom: +(1 - .055 - bh).toFixed(4) }[row];
+      layoutChanged();
+    });
+    $("grid9").append(b);
+  }
+}
+function layoutChanged() {
+  $("saveLayout").disabled = JSON.stringify(S.layout) === S.saved;
+  notify("textNotice", "");
+  preview();
+}
+function bindLayout() {
+  for (const id of LAYOUT_RANGE) {
+    const el = $(id), out = $(id + "Out");
+    el.value = S.layout[id]; out.textContent = S.layout[id];
+    el.oninput = () => { S.layout[id] = +el.value; out.textContent = el.value; layoutChanged(); };
+  }
+  for (const id of LAYOUT_OTHER) {
+    const el = $(id); el.value = S.layout[id];
+    el.oninput = () => { S.layout[id] = el.value; layoutChanged(); };
+  }
+}
+function setupTokens() {
+  let last = $("headline");
+  for (const id of ["headline", "caption"]) $(id).addEventListener("focus", (e) => last = e.target);
+  for (const [key, label] of Object.entries(TOKENS)) {
+    const b = document.createElement("button");
+    b.className = "token"; b.textContent = `{${key}} ${label}`;
+    b.addEventListener("click", () => {
+      const at = last.selectionStart ?? last.value.length;
+      last.value = last.value.slice(0, at) + `{${key}}` + last.value.slice(last.selectionEnd ?? at);
+      last.dispatchEvent(new Event("input")); last.focus();
+    });
+    $("tokens").append(b);
+  }
+}
+function renderGallery(items) {
+  const host = $("gallery"); host.innerHTML = "";
+  for (const item of items) {
+    const wrap = document.createElement("div");
+    const b = document.createElement("button");
+    b.className = "tile" + (item.enabled === false ? " off" : "");
+    b.setAttribute("aria-pressed", item.id === S.image);
+    b.innerHTML = `<img loading="lazy" alt=""><span></span><em></em>`;
+    b.querySelector("img").src = `/api/thumb/${encodeURIComponent(item.id)}`;
+    b.querySelector("span").textContent = item.caption || item.id;
+    b.querySelector("em").textContent = [item.kind === "painting" ? "명화" : "사진", ...(item.times || [])].join(" · ");
+    b.addEventListener("click", () => { S.image = item.id; preview(); for (const t of host.querySelectorAll(".tile")) t.setAttribute("aria-pressed", t === b); });
+    const use = document.createElement("label");
+    use.className = "use";
+    use.innerHTML = `<input type="checkbox"> 액자에 사용`;
+    const box = use.querySelector("input"); box.checked = item.enabled !== false;
+    box.addEventListener("change", async () => {
+      await api(`/api/library/${encodeURIComponent(item.id)}`, { enabled: box.checked });
+      item.enabled = box.checked; b.classList.toggle("off", !box.checked);
+    });
+    wrap.append(b, use); host.append(wrap);
+  }
+}
+function setPill(state, text) { $("tvPill").dataset.state = state; $("tvPillText").textContent = text; }
+function facts(rows) {
+  const dl = $("tvFacts"); dl.innerHTML = "";
+  for (const [k, v] of rows) {
+    const dt = document.createElement("dt"), dd = document.createElement("dd");
+    dt.textContent = k; dd.textContent = v ?? "—"; dl.append(dt, dd);
+  }
+}
+async function refreshTv() {
+  notify("tvNotice", "TV를 확인하는 중입니다");
+  try {
+    const tv = await api("/api/tv");
+    if (!tv.reachable) {
+      setPill(tv.standby ? "standby" : "off", tv.standby ? "TV 대기 상태" : "TV에 연결되지 않음");
+      facts([["주소", tv.host], ["상태", tv.standby ? "대기 상태" : "응답 없음"]]);
+      notify("tvNotice", tv.standby ? "TV가 켜지면 다음 확인 때 그림이 바뀝니다." : "TV 전원과 주소를 확인하세요.", tv.standby ? "" : "err");
+      return;
+    }
+    const art = tv.art_mode === "on" ? "켜짐" : tv.art_mode === "off" ? "꺼짐" : "확인 못 함";
+    setPill("on", `${tv.model || "TV"} · 아트모드 ${art}`);
+    facts([["주소", tv.host], ["모델", tv.model], ["더 프레임 지원", tv.frame ? "예" : "아니요"], ["전원", tv.power], ["연결", tv.network], ["아트모드", art], ["현재 작품", tv.current], ["Art API", tv.api_version], ["올린 사진", tv.uploaded]]);
+    notify("tvNotice", tv.art_error ? `아트모드 정보를 읽지 못했습니다: ${tv.art_error}` : "", tv.art_error ? "err" : "ok");
+  } catch (e) { notify("tvNotice", e.message, "err"); setPill("off", "상태 확인 실패"); }
+}
+async function refreshLog() {
+  const { lines } = await api("/api/log");
+  $("log").textContent = lines.length ? lines.join("\n") : "기록이 없습니다";
+}
+function showRegion(name, tz) { $("regionNow").textContent = name ? `현재 지역: ${name} (${tz})` : "지역을 찾아 설정하세요."; }
+async function useRegion(query, place) {
+  const out = await api("/api/location", { query, ...place });
+  showRegion(place.name, out.timezone);
+  S.real = await api("/api/context"); S.ctx = { ...S.real }; syncChips(); preview();
+}
+function setupRegion() {
+  $("regionForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const query = $("region").value.trim();
+    const list = $("regionList"); list.innerHTML = "";
+    if (!query) { notify("regionNotice", "지역 이름을 입력하세요.", "err"); return; }
+    notify("regionNotice", "찾는 중입니다");
+    try {
+      const places = await api("/api/geocode", { query });
+      if (!places.length) { notify("regionNotice", "찾지 못했습니다. 시나 구 이름으로 다시 입력해 보세요.", "err"); return; }
+      await useRegion(query, places[0]);
+      notify("regionNotice", places.length > 1 ? "가장 잘 맞는 결과로 맞췄습니다. 다르면 아래에서 고르세요." : "지역을 맞췄습니다.", "ok");
+      for (const place of places.slice(1)) {
+        const row = document.createElement("div"); row.className = "tv-row";
+        row.innerHTML = `<span></span><button class="btn" type="button">이 지역 사용</button>`;
+        row.querySelector("span").textContent = place.name;
+        row.querySelector("button").addEventListener("click", async () => {
+          await useRegion(query, place); list.innerHTML = ""; notify("regionNotice", "지역을 바꿨습니다.", "ok");
+        });
+        list.append(row);
+      }
+    } catch (err) { notify("regionNotice", "지역 검색 서비스에 연결하지 못했습니다. 잠시 뒤 다시 시도하세요.", "err"); }
+  });
+}
+function setupActions() {
+  document.querySelectorAll(".tab").forEach((tab) => tab.addEventListener("click", () => {
+    document.querySelectorAll(".tab").forEach((t) => t.setAttribute("aria-selected", t === tab));
+    document.querySelectorAll(".panel").forEach((p) => p.hidden = p.id !== "panel-" + tab.dataset.tab);
+    if (tab.dataset.tab === "auto") refreshLog();
+  }));
+  $("temp").addEventListener("input", () => { S.ctx.temperature = +$("temp").value; preview(); });
+  $("useReal").addEventListener("click", () => { S.ctx = { ...S.real }; syncChips(); preview(); });
+  $("saveLayout").addEventListener("click", async () => {
+    await api("/api/config", { layout: S.layout });
+    S.saved = JSON.stringify(S.layout); $("saveLayout").disabled = true;
+    notify("textNotice", "레이아웃을 저장했습니다. 다음 교체부터 적용됩니다.", "ok");
+  });
+  $("sendTv").addEventListener("click", async () => {
+    const b = $("sendTv"); b.disabled = true;
+    notify("textNotice", "TV로 보내는 중입니다");
+    try {
+      if (!$("saveLayout").disabled) $("saveLayout").click();
+      const out = await api("/api/apply", { image: S.image });
+      notify("textNotice", out.ok ? (out.output.includes("standby") ? "TV가 대기 상태라 보내지 못했습니다." : "TV에 보냈습니다.") : out.output, out.ok && !out.output.includes("standby") ? "ok" : "err");
+      refreshTv();
+    } catch (e) { notify("textNotice", e.message, "err"); }
+    b.disabled = false;
+  });
+  $("tvRefresh").addEventListener("click", refreshTv);
+  $("tvDiscover").addEventListener("click", async () => {
+    notify("tvNotice", "같은 네트워크를 찾는 중입니다");
+    const list = await api("/api/tv/discover", {});
+    const host = $("tvFound"); host.innerHTML = "";
+    notify("tvNotice", list.length ? `삼성 TV ${list.length}대를 찾았습니다.` : "찾지 못했습니다. TV를 켠 뒤 다시 시도하세요.", list.length ? "ok" : "err");
+    for (const tv of list) {
+      const row = document.createElement("div"); row.className = "tv-row";
+      row.innerHTML = `<span></span><button class="btn">이 TV 사용</button>`;
+      row.querySelector("span").textContent = `${tv.model || tv.name} · ${tv.host}${tv.frame ? " · 더 프레임" : ""}`;
+      row.querySelector("button").addEventListener("click", async () => {
+        $("tv_host").value = tv.host;
+        await api("/api/config", { tv_host: tv.host }); refreshTv();
+      });
+      host.append(row);
+    }
+  });
+  $("saveHost").addEventListener("click", async () => { await api("/api/config", { tv_host: $("tv_host").value.trim() }); refreshTv(); });
+  $("saveSettings").addEventListener("click", async () => {
+    await api("/api/config", { change_minutes: +$("change_minutes").value, min_weather_change_minutes: +$("min_weather_change_minutes").value });
+    notify("autoNotice", "설정을 저장했습니다.", "ok");
+  });
+  $("timerToggle").addEventListener("change", async (e) => {
+    const out = await api("/api/timer", { enabled: e.target.checked });
+    notify("autoNotice", out.ok ? (e.target.checked ? "자동 교체를 켰습니다." : "자동 교체를 껐습니다.") : out.output, out.ok ? "ok" : "err");
+    if (!out.ok) e.target.checked = !e.target.checked;
+  });
+  $("cleanupToggle").addEventListener("change", async (e) => {
+    const out = await api("/api/cleanup", { enabled: e.target.checked });
+    notify("autoNotice", out.cleanup ? "다음 교체부터 이전 이미지를 삭제합니다." : "이전 이미지를 삭제하지 않습니다.", "ok");
+  });
+}
+async function load() {
+  chips($("bandChips"), BANDS, "band"); chips($("weatherChips"), WEATHER, "weather");
+  setupDrag(); setupGrid9(); setupTokens(); setupActions(); setupRegion();
+  const st = await api("/api/state");
+  S.layout = { ...st.layout }; S.saved = JSON.stringify(S.layout);
+  S.real = await api("/api/context"); S.ctx = { ...S.real };
+  const usable = st.catalog.filter((i) => i.enabled !== false);
+  S.image = st.state.history?.at(-1) ?? usable[0]?.id ?? null;
+  for (const id of ["tv_host", "change_minutes", "min_weather_change_minutes"]) $(id).value = st.config[id] ?? "";
+  $("region").value = st.config.location_label ?? "";
+  showRegion(st.config.location_detail ?? st.config.location_label, st.config.timezone);
+  $("timerToggle").checked = st.timer; $("cleanupToggle").checked = st.cleanup;
+  bindLayout(); syncChips(); renderGallery(st.catalog); drawPreview(); refreshTv();
+}
+load().catch((e) => notify("textNotice", e.message, "err"));
+</script>
+</body>
+</html>

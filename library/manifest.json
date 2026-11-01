@@ -1,0 +1,956 @@
+[
+ {
+  "id": "hallasan-sunrise",
+  "kind": "photo",
+  "caption": "제주 한라산 일출",
+  "times": [
+   "dawn"
+  ],
+  "seasons": [
+   "any"
+  ],
+  "weather": [
+   "clear"
+  ],
+  "url": "https://upload.wikimedia.org/wikipedia/commons/f/f8/Hallasan_Sunrise_01.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+  "source": "File:Hallasan Sunrise 01.jpg",
+  "license": "KOGL Type 1",
+  "artist": "제주영상문화산업진흥원"
+ },
+ {
+  "id": "willoughby-autumn",
+  "kind": "photo",
+  "caption": "미국 버몬트 윌러비 호수의 10월",
+  "times": [
+   "morning",
+   "day"
+  ],
+  "seasons": [
+   "autumn"
+  ],
+  "weather": [
+   "clear",
+   "cloud"
+  ],
+  "url": "https://upload.wikimedia.org/wikipedia/commons/7/75/Lake_Willoughby_October_2021_003.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+  "source": "File:Lake Willoughby October 2021 003.jpg",
+  "license": "CC BY-SA 4.0",
+  "artist": "King of Hearts"
+ },
+ {
+  "id": "seoul-aerial",
+  "kind": "photo",
+  "caption": "서울 항공 사진",
+  "times": [
+   "morning",
+   "day"
+  ],
+  "seasons": [
+   "any"
+  ],
+  "weather": [
+   "cloud",
+   "fog"
+  ],
+  "url": "https://upload.wikimedia.org/wikipedia/commons/9/98/Seoul_Aerial_Shot_01.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+  "source": "File:Seoul Aerial Shot 01.jpg",
+  "license": "CC BY-SA 2.0",
+  "artist": "Republic of  Korea"
+ },
+ {
+  "id": "superga-sunset",
+  "kind": "photo",
+  "caption": "이탈리아 토리노 수페르가 성당의 노을",
+  "times": [
+   "sunset"
+  ],
+  "seasons": [
+   "any"
+  ],
+  "weather": [
+   "clear",
+   "cloud"
+  ],
+  "url": "https://upload.wikimedia.org/wikipedia/commons/6/6e/La_basilica_al_tramonto.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+  "source": "File:La basilica al tramonto.jpg",
+  "license": "CC BY-SA 4.0",
+  "artist": "Domeian"
+ },
+ {
+  "id": "gwangan-night",
+  "kind": "photo",
+  "caption": "부산 광안대교의 밤",
+  "times": [
+   "sunset",
+   "night"
+  ],
+  "seasons": [
+   "any"
+  ],
+  "weather": [
+   "clear",
+   "cloud"
+  ],
+  "url": "https://upload.wikimedia.org/wikipedia/commons/0/0e/Gwangan_Bridge_and_Gwangalli_Beach_-_Gwangalli2721.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+  "source": "File:Gwangan Bridge and Gwangalli Beach - Gwangalli2721.jpg",
+  "license": "CC0",
+  "artist": "lumoplank"
+ },
+ {
+  "id": "starry-rhone",
+  "kind": "painting",
+  "caption": "론강의 별이 빛나는 밤, 빈센트 반 고흐",
+  "times": [
+   "night"
+  ],
+  "seasons": [
+   "any"
+  ],
+  "weather": [
+   "any"
+  ],
+  "fit": "mat",
+  "url": "https://upload.wikimedia.org/wikipedia/commons/9/94/Starry_Night_Over_the_Rhone.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+  "source": "File:Starry Night Over the Rhone.jpg",
+  "license": "Public domain",
+  "artist": "Vincent van Gogh"
+ },
+ {
+  "id": "scuol-autumn",
+  "kind": "photo",
+  "caption": "스위스 스쿠올의 가을 산",
+  "times": [
+   "morning",
+   "day"
+  ],
+  "seasons": [
+   "autumn"
+  ],
+  "weather": [
+   "clear",
+   "cloud"
+  ],
+  "url": "https://upload.wikimedia.org/wikipedia/commons/b/bc/Scuol-Motta_Naluns%2C_11-10-2024._%28actm.%29_21.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+  "source": "File:Scuol-Motta Naluns, 11-10-2024. (actm.) 21.jpg",
+  "license": "CC BY-SA 4.0",
+  "artist": "Agnes Monkelbaan"
+ },
+ {
+  "id": "spechtensee",
+  "kind": "photo",
+  "caption": "오스트리아 슈페히텐 호수",
+  "times": [
+   "morning",
+   "day"
+  ],
+  "seasons": [
+   "spring",
+   "summer"
+  ],
+  "weather": [
+   "clear"
+  ],
+  "url": "https://upload.wikimedia.org/wikipedia/commons/4/47/Spechtensee_gegen_Westen_01.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+  "source": "File:Spechtensee gegen Westen 01.JPG",
+  "license": "CC BY-SA 3.0 at",
+  "artist": "Uoaei1"
+ },
+ {
+  "id": "vihorlat-winter",
+  "kind": "photo",
+  "caption": "슬로바키아 비호를라트의 겨울",
+  "times": [
+   "dawn",
+   "morning"
+  ],
+  "seasons": [
+   "winter"
+  ],
+  "weather": [
+   "clear",
+   "snow"
+  ],
+  "url": "https://upload.wikimedia.org/wikipedia/commons/b/bf/Vihorlat_%28v_zime%29_046.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+  "source": "File:Vihorlat (v zime) 046.jpg",
+  "license": "CC BY-SA 4.0",
+  "artist": "Milan Bališin"
+ },
+ {
+  "id": "dingle-coast",
+  "kind": "photo",
+  "caption": "아일랜드 딩글 해안",
+  "times": [
+   "day"
+  ],
+  "seasons": [
+   "spring",
+   "summer"
+  ],
+  "weather": [
+   "clear"
+  ],
+  "url": "https://upload.wikimedia.org/wikipedia/commons/b/b7/2019-07-20-Dingle_Lighthouse-0673.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+  "source": "File:2019-07-20-Dingle Lighthouse-0673.jpg",
+  "license": "CC BY-SA 4.0",
+  "artist": "Superbass"
+ },
+ {
+  "id": "lough-hyne",
+  "kind": "photo",
+  "caption": "아일랜드 하인 호수",
+  "times": [
+   "day"
+  ],
+  "seasons": [
+   "summer"
+  ],
+  "weather": [
+   "clear"
+  ],
+  "url": "https://upload.wikimedia.org/wikipedia/commons/1/15/2019-07-31-Lough_Hyne-0828.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+  "source": "File:2019-07-31-Lough Hyne-0828.jpg",
+  "license": "CC BY-SA 4.0",
+  "artist": "Superbass"
+ },
+ {
+  "id": "cisnadioara-winter",
+  "kind": "photo",
+  "caption": "루마니아 치스너디오아라의 겨울",
+  "times": [
+   "morning",
+   "day"
+  ],
+  "seasons": [
+   "winter"
+  ],
+  "weather": [
+   "clear",
+   "snow"
+  ],
+  "url": "https://upload.wikimedia.org/wikipedia/commons/8/84/Biserica_fortificat%C4%83_Cisn%C4%83dioara%2C_iarna._Ianuarie_2020.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+  "source": "File:Biserica fortificată Cisnădioara, iarna. Ianuarie 2020.jpg",
+  "license": "CC BY-SA 4.0",
+  "artist": "Adrian Arsu"
+ },
+ {
+  "id": "vindeln-bridge",
+  "kind": "photo",
+  "caption": "스웨덴 빈델른의 철교",
+  "times": [
+   "day"
+  ],
+  "seasons": [
+   "winter",
+   "spring"
+  ],
+  "weather": [
+   "clear"
+  ],
+  "url": "https://upload.wikimedia.org/wikipedia/commons/c/c3/CargoNet_185_Vindeln_-_Tv%C3%A4r%C3%A5lund.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+  "source": "File:CargoNet 185 Vindeln - Tvärålund.jpg",
+  "license": "CC BY-SA 4.0",
+  "artist": "Kabelleger / David Gubler\n\n This photo was taken with Hasselblad L1D-20c"
+ },
+ {
+  "id": "kaisepakte-autumn",
+  "kind": "photo",
+  "caption": "스웨덴 카이세파크테의 단풍",
+  "times": [
+   "day"
+  ],
+  "seasons": [
+   "autumn"
+  ],
+  "weather": [
+   "cloud",
+   "clear"
+  ],
+  "url": "https://upload.wikimedia.org/wikipedia/commons/f/f3/MTAB_IORE_133_and_105_Kaisepakte_-_Stenbacken.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+  "source": "File:MTAB IORE 133 and 105 Kaisepakte - Stenbacken.jpg",
+  "license": "CC BY-SA 4.0",
+  "artist": "Kabelleger / David Gubler"
+ },
+ {
+  "id": "yekaterinburg-sunset",
+  "kind": "photo",
+  "caption": "러시아 예카테린부르크의 해넘이",
+  "times": [
+   "sunset"
+  ],
+  "seasons": [
+   "any"
+  ],
+  "weather": [
+   "clear"
+  ],
+  "url": "https://upload.wikimedia.org/wikipedia/commons/3/39/E-burg_asv2019-05_img46_view_from_VysotSky.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+  "source": "File:E-burg asv2019-05 img46 view from VysotSky.jpg",
+  "license": "FAL",
+  "artist": "A.Savin"
+ },
+ {
+  "id": "utah-dunes",
+  "kind": "photo",
+  "caption": "미국 유타의 모래 언덕",
+  "times": [
+   "dawn",
+   "sunset"
+  ],
+  "seasons": [
+   "any"
+  ],
+  "weather": [
+   "clear"
+  ],
+  "url": "https://upload.wikimedia.org/wikipedia/commons/c/cb/Utah_Dunes_Landscape_-_West_Desert_District.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+  "source": "File:Utah Dunes Landscape - West Desert District.jpg",
+  "license": "Public domain",
+  "artist": "Bureau of Land Management - Utah/Bob Wick"
+ },
+ {
+  "id": "val-sinestra",
+  "kind": "photo",
+  "caption": "스위스 발 시네스트라",
+  "times": [
+   "dawn",
+   "morning"
+  ],
+  "seasons": [
+   "autumn"
+  ],
+  "weather": [
+   "clear"
+  ],
+  "url": "https://upload.wikimedia.org/wikipedia/commons/9/9d/Val_Sinestra._11-10-2024._%28d.j.b.%29_03.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+  "source": "File:Val Sinestra. 11-10-2024. (d.j.b.) 03.jpg",
+  "license": "CC BY-SA 4.0",
+  "artist": "Dominicus Johannes Bergsma"
+ },
+ {
+  "id": "ai-petri-clouds",
+  "kind": "photo",
+  "caption": "아이페트리 산의 운해",
+  "times": [
+   "dawn",
+   "morning"
+  ],
+  "seasons": [
+   "autumn",
+   "winter"
+  ],
+  "weather": [
+   "clear",
+   "fog"
+  ],
+  "url": "https://upload.wikimedia.org/wikipedia/commons/a/a3/Crimea%2C_Ai-Petri%2C_low_clouds.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+  "source": "File:Crimea, Ai-Petri, low clouds.jpg",
+  "license": "CC BY-SA 4.0",
+  "artist": "Dmytro Balkhovitin"
+ },
+ {
+  "id": "dulmen-morning",
+  "kind": "photo",
+  "caption": "독일 뒬멘의 아침 안개",
+  "times": [
+   "dawn",
+   "morning"
+  ],
+  "seasons": [
+   "any"
+  ],
+  "weather": [
+   "fog",
+   "clear"
+  ],
+  "url": "https://upload.wikimedia.org/wikipedia/commons/c/ca/D%C3%BClmen%2C_B%C3%B6rnste%2C_Eisenbahnlinie_Dortmund-Enschede_--_2015_--_9918.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+  "source": "File:Dülmen, Börnste, Eisenbahnlinie Dortmund-Enschede -- 2015 -- 9918.jpg",
+  "license": "CC BY-SA 4.0",
+  "artist": "Dietmar Rabich"
+ },
+ {
+  "id": "albury-cloud",
+  "kind": "photo",
+  "caption": "호주 올버리의 노을 구름",
+  "times": [
+   "sunset"
+  ],
+  "seasons": [
+   "any"
+  ],
+  "weather": [
+   "clear",
+   "cloud"
+  ],
+  "url": "https://upload.wikimedia.org/wikipedia/commons/a/a7/Cumulonimbus_sunset_panorama%2C_Albury_NSW_Australia.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+  "source": "File:Cumulonimbus sunset panorama, Albury NSW Australia.jpg",
+  "license": "CC BY-SA 4.0",
+  "artist": "Thennicke"
+ },
+ {
+  "id": "brofjorden-sunset",
+  "kind": "photo",
+  "caption": "스웨덴 브로피오르덴 얼음 위의 노을",
+  "times": [
+   "sunset"
+  ],
+  "seasons": [
+   "winter"
+  ],
+  "weather": [
+   "clear"
+  ],
+  "url": "https://upload.wikimedia.org/wikipedia/commons/8/8e/Sunset_over_the_ice_of_Brofjorden_1.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+  "source": "File:Sunset over the ice of Brofjorden 1.jpg",
+  "license": "CC BY-SA 4.0",
+  "artist": "W.carter"
+ },
+ {
+  "id": "sugarloaf-sunset",
+  "kind": "photo",
+  "caption": "브라질 리우데자네이루 빵산의 노을",
+  "times": [
+   "sunset"
+  ],
+  "seasons": [
+   "any"
+  ],
+  "weather": [
+   "cloud"
+  ],
+  "url": "https://upload.wikimedia.org/wikipedia/commons/0/00/Sweet_Bread_Mountain.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+  "source": "File:Sweet Bread Mountain.jpg",
+  "license": "CC BY-SA 4.0",
+  "artist": "Donatas Dabravolskas"
+ },
+ {
+  "id": "cologne-evening",
+  "kind": "photo",
+  "caption": "독일 쾰른의 저녁",
+  "times": [
+   "sunset",
+   "night"
+  ],
+  "seasons": [
+   "any"
+  ],
+  "weather": [
+   "clear",
+   "cloud"
+  ],
+  "url": "https://upload.wikimedia.org/wikipedia/commons/5/5f/Kranh%C3%A4user_Cologne%2C_April_2018_-01.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+  "source": "File:Kranhäuser Cologne, April 2018 -01.jpg",
+  "license": "CC BY-SA 4.0",
+  "artist": "Martin Falbisoner"
+ },
+ {
+  "id": "frankfurt-night",
+  "kind": "photo",
+  "caption": "독일 프랑크푸르트 뢰머 광장의 밤",
+  "times": [
+   "night"
+  ],
+  "seasons": [
+   "any"
+  ],
+  "weather": [
+   "clear",
+   "cloud"
+  ],
+  "url": "https://upload.wikimedia.org/wikipedia/commons/9/92/R%C3%B6merberg_Frankfurt_abends.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+  "source": "File:Römerberg Frankfurt abends.jpg",
+  "license": "CC BY-SA 3.0",
+  "artist": "Thomas Wolf (Der Wolf im Wald)"
+ },
+ {
+  "id": "seoul-han-aerial",
+  "kind": "photo",
+  "caption": "서울 한강 항공 사진",
+  "times": [
+   "morning",
+   "day"
+  ],
+  "seasons": [
+   "any"
+  ],
+  "weather": [
+   "cloud",
+   "fog"
+  ],
+  "url": "https://upload.wikimedia.org/wikipedia/commons/c/c5/Seoul_Aerial_Shot_03.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+  "source": "File:Seoul Aerial Shot 03.jpg",
+  "license": "CC BY-SA 2.0",
+  "artist": "Republic of  Korea"
+ },
+ {
+  "id": "gwangan-evening",
+  "kind": "photo",
+  "caption": "부산 광안대교의 저녁",
+  "times": [
+   "sunset"
+  ],
+  "seasons": [
+   "any"
+  ],
+  "weather": [
+   "clear"
+  ],
+  "url": "https://upload.wikimedia.org/wikipedia/commons/f/fd/Gwangan_Bridge%2C_Busan%2C_lighted_up_in_purple_for_BTS%2C_June_2019.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+  "source": "File:Gwangan Bridge, Busan, lighted up in purple for BTS, June 2019.jpg",
+  "license": "KOGL Type 1",
+  "artist": "Busan Metropolitan City citizen photo journalist Kwon Ki-hak"
+ },
+ {
+  "id": "baengnokdam",
+  "kind": "photo",
+  "caption": "제주 한라산 백록담",
+  "times": [
+   "morning",
+   "day"
+  ],
+  "seasons": [
+   "winter"
+  ],
+  "weather": [
+   "clear",
+   "snow"
+  ],
+  "url": "https://upload.wikimedia.org/wikipedia/commons/1/16/Baengnokdam_%282025-01%29_3.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+  "source": "File:Baengnokdam (2025-01) 3.jpg",
+  "license": "CC BY 4.0",
+  "artist": "Sadopaul"
+ },
+ {
+  "id": "yeouido-night",
+  "kind": "photo",
+  "caption": "서울 여의도의 밤",
+  "times": [
+   "night"
+  ],
+  "seasons": [
+   "any"
+  ],
+  "weather": [
+   "cloud",
+   "rain"
+  ],
+  "url": "https://upload.wikimedia.org/wikipedia/commons/9/9a/Yeouido_Night_View_2010.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+  "source": "File:Yeouido Night View 2010.jpg",
+  "license": "CC BY 2.0",
+  "artist": "Bryan Dorrough"
+ },
+ {
+  "id": "monet-cloud-lilies",
+  "kind": "painting",
+  "caption": "수련 연못에 비친 구름, 클로드 모네",
+  "times": [
+   "morning",
+   "day"
+  ],
+  "seasons": [
+   "summer",
+   "autumn"
+  ],
+  "weather": [
+   "cloud"
+  ],
+  "url": "https://upload.wikimedia.org/wikipedia/commons/4/43/Claude_Monet_-_Reflections_of_Clouds_on_the_Water-Lily_Pond.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+  "source": "File:Claude Monet - Reflections of Clouds on the Water-Lily Pond.jpg",
+  "license": "Public domain",
+  "artist": "Claude Monet"
+ },
+ {
+  "id": "impression-sunrise",
+  "kind": "painting",
+  "caption": "인상, 해돋이, 클로드 모네",
+  "times": [
+   "dawn",
+   "sunset"
+  ],
+  "seasons": [
+   "any"
+  ],
+  "weather": [
+   "any"
+  ],
+  "fit": "mat",
+  "url": "https://upload.wikimedia.org/wikipedia/commons/5/59/Monet_-_Impression%2C_Sunrise.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+  "source": "File:Monet - Impression, Sunrise.jpg",
+  "license": "Public domain",
+  "artist": "Claude Monet"
+ },
+ {
+  "id": "haystacks-summer",
+  "kind": "painting",
+  "caption": "건초더미, 여름의 끝, 클로드 모네",
+  "times": [
+   "day"
+  ],
+  "seasons": [
+   "summer",
+   "autumn"
+  ],
+  "weather": [
+   "clear"
+  ],
+  "url": "https://upload.wikimedia.org/wikipedia/commons/f/ff/Claude_Monet_-_Haystacks%2C_end_of_Summer_-_Google_Art_Project.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+  "source": "File:Claude Monet - Haystacks, end of Summer - Google Art Project.jpg",
+  "license": "Public domain",
+  "artist": "Claude Monet"
+ },
+ {
+  "id": "haystacks-snow",
+  "kind": "painting",
+  "caption": "건초더미, 눈의 효과, 클로드 모네",
+  "times": [
+   "morning",
+   "day"
+  ],
+  "seasons": [
+   "winter"
+  ],
+  "weather": [
+   "snow",
+   "cloud"
+  ],
+  "fit": "mat",
+  "url": "https://upload.wikimedia.org/wikipedia/commons/4/44/Claude_Monet_-_Haystacks-_Snow_Effect_-_Google_Art_Project.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+  "source": "File:Claude Monet - Haystacks- Snow Effect - Google Art Project.jpg",
+  "license": "Public domain",
+  "artist": "Claude Monet"
+ },
+ {
+  "id": "almond-blossom",
+  "kind": "painting",
+  "caption": "꽃 피는 아몬드나무, 빈센트 반 고흐",
+  "times": [
+   "morning",
+   "day"
+  ],
+  "seasons": [
+   "spring"
+  ],
+  "weather": [
+   "any"
+  ],
+  "fit": "mat",
+  "url": "https://upload.wikimedia.org/wikipedia/commons/3/39/Blossoming_Almond_Tree.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+  "source": "File:Blossoming Almond Tree.jpg",
+  "license": "Public domain",
+  "artist": "Vincent van Gogh"
+ },
+ {
+  "id": "great-wave",
+  "kind": "painting",
+  "caption": "가나가와 해변의 높은 파도, 가쓰시카 호쿠사이",
+  "times": [
+   "any"
+  ],
+  "seasons": [
+   "any"
+  ],
+  "weather": [
+   "any"
+  ],
+  "fit": "mat",
+  "url": "https://upload.wikimedia.org/wikipedia/commons/0/0d/Great_Wave_off_Kanagawa2.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+  "source": "File:Great Wave off Kanagawa2.jpg",
+  "license": "Public domain",
+  "artist": "After Katsushika Hokusai"
+ },
+ {
+  "id": "red-fuji",
+  "kind": "painting",
+  "caption": "붉은 후지산, 가쓰시카 호쿠사이",
+  "times": [
+   "dawn",
+   "morning"
+  ],
+  "seasons": [
+   "summer",
+   "autumn"
+  ],
+  "weather": [
+   "clear"
+  ],
+  "fit": "mat",
+  "url": "https://upload.wikimedia.org/wikipedia/commons/2/25/Katsushika_Hokusai_-_Fine_Wind%2C_Clear_Morning_%28Gaif%C5%AB_kaisei%29_-_Google_Art_Project.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+  "source": "File:Katsushika Hokusai - Fine Wind, Clear Morning (Gaifū kaisei) - Google Art Project.jpg",
+  "license": "Public domain",
+  "artist": "Katsushika Hokusai"
+ },
+ {
+  "id": "temeraire",
+  "kind": "painting",
+  "caption": "전함 테메레르, 윌리엄 터너",
+  "times": [
+   "sunset"
+  ],
+  "seasons": [
+   "any"
+  ],
+  "weather": [
+   "any"
+  ],
+  "fit": "mat",
+  "url": "https://upload.wikimedia.org/wikipedia/commons/9/94/Turner%2C_J._M._W._-_The_Fighting_T%C3%A9m%C3%A9raire_tugged_to_her_last_Berth_to_be_broken.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+  "source": "File:Turner, J. M. W. - The Fighting Téméraire tugged to her last Berth to be broken.jpg",
+  "license": "Public domain",
+  "artist": "J. M. W. Turner"
+ },
+ {
+  "id": "rain-steam-speed",
+  "kind": "painting",
+  "caption": "비, 증기, 속도, 윌리엄 터너",
+  "times": [
+   "day"
+  ],
+  "seasons": [
+   "any"
+  ],
+  "weather": [
+   "rain",
+   "fog"
+  ],
+  "fit": "mat",
+  "url": "https://upload.wikimedia.org/wikipedia/commons/3/35/Rain_Steam_and_Speed_the_Great_Western_Railway.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+  "source": "File:Rain Steam and Speed the Great Western Railway.jpg",
+  "license": "Public domain",
+  "artist": "J. M. W. Turner"
+ },
+ {
+  "id": "sea-of-ice",
+  "kind": "painting",
+  "caption": "얼음 바다, 카스파어 다비트 프리드리히",
+  "times": [
+   "day"
+  ],
+  "seasons": [
+   "winter"
+  ],
+  "weather": [
+   "clear",
+   "snow"
+  ],
+  "fit": "mat",
+  "url": "https://upload.wikimedia.org/wikipedia/commons/c/c4/Caspar_David_Friedrich_%E2%80%93_Das_Eismeer.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+  "source": "File:Caspar David Friedrich – Das Eismeer.jpg",
+  "license": "Public domain",
+  "artist": "Caspar David Friedrich"
+ },
+ {
+  "id": "moonrise-sea",
+  "kind": "painting",
+  "caption": "바닷가의 월출, 카스파어 다비트 프리드리히",
+  "times": [
+   "sunset",
+   "night"
+  ],
+  "seasons": [
+   "any"
+  ],
+  "weather": [
+   "any"
+  ],
+  "fit": "mat",
+  "url": "https://upload.wikimedia.org/wikipedia/commons/0/01/Caspar_David_Friedrich_-_Mondaufgang_am_Meer_-_Google_Art_Project.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+  "source": "File:Caspar David Friedrich - Mondaufgang am Meer - Google Art Project.jpg",
+  "license": "Public domain",
+  "artist": "Caspar David Friedrich"
+ },
+ {
+  "id": "sierra-nevada",
+  "kind": "painting",
+  "caption": "시에라네바다에서, 알베르트 비어슈타트",
+  "times": [
+   "morning",
+   "day"
+  ],
+  "seasons": [
+   "any"
+  ],
+  "weather": [
+   "cloud"
+  ],
+  "url": "https://upload.wikimedia.org/wikipedia/commons/5/5c/Albert_Bierstadt_-_Among_the_Sierra_Nevada%2C_California_-_Google_Art_Project.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+  "source": "File:Albert Bierstadt - Among the Sierra Nevada, California - Google Art Project.jpg",
+  "license": "Public domain",
+  "artist": "Albert Bierstadt"
+ },
+ {
+  "id": "heart-of-andes",
+  "kind": "painting",
+  "caption": "안데스의 심장, 프레더릭 에드윈 처치",
+  "times": [
+   "day"
+  ],
+  "seasons": [
+   "summer"
+  ],
+  "weather": [
+   "clear"
+  ],
+  "url": "https://upload.wikimedia.org/wikipedia/commons/7/78/Church_Heart_of_the_Andes.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+  "source": "File:Church Heart of the Andes.jpg",
+  "license": "Public domain",
+  "artist": "Frederic Edwin Church"
+ },
+ {
+  "id": "twilight-wilderness",
+  "kind": "painting",
+  "caption": "황야의 황혼, 프레더릭 에드윈 처치",
+  "times": [
+   "sunset"
+  ],
+  "seasons": [
+   "any"
+  ],
+  "weather": [
+   "any"
+  ],
+  "url": "https://upload.wikimedia.org/wikipedia/commons/9/98/Twilight_in_the_Wilderness_by_Frederic_Edwin_Church_%283%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+  "source": "File:Twilight in the Wilderness by Frederic Edwin Church (3).jpg",
+  "license": "Public domain",
+  "artist": "Frederic Edwin Church"
+ },
+ {
+  "id": "oxbow",
+  "kind": "painting",
+  "caption": "옥스보, 토머스 콜",
+  "times": [
+   "day"
+  ],
+  "seasons": [
+   "summer"
+  ],
+  "weather": [
+   "cloud",
+   "rain"
+  ],
+  "fit": "mat",
+  "url": "https://upload.wikimedia.org/wikipedia/commons/b/b1/Cole_Thomas_The_Oxbow_%28The_Connecticut_River_near_Northampton_1836%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+  "source": "File:Cole Thomas The Oxbow (The Connecticut River near Northampton 1836).jpg",
+  "license": "Public domain",
+  "artist": "Thomas Cole"
+ },
+ {
+  "id": "grande-jatte",
+  "kind": "painting",
+  "caption": "그랑드자트 섬의 일요일 오후, 조르주 쇠라",
+  "times": [
+   "day"
+  ],
+  "seasons": [
+   "spring",
+   "summer"
+  ],
+  "weather": [
+   "clear"
+  ],
+  "fit": "mat",
+  "url": "https://upload.wikimedia.org/wikipedia/commons/0/03/Georges_Seurat_-_Un_dimanche_apr%C3%A8s-midi_%C3%A0_l%27%C3%AEle_de_la_Grande_Jatte.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+  "source": "File:Georges Seurat - Un dimanche après-midi à l'île de la Grande Jatte.jpg",
+  "license": "Public domain",
+  "artist": "Georges Seurat"
+ },
+ {
+  "id": "montmartre-autumn",
+  "kind": "painting",
+  "caption": "몽마르트르 대로, 카미유 피사로",
+  "times": [
+   "morning",
+   "day"
+  ],
+  "seasons": [
+   "autumn"
+  ],
+  "weather": [
+   "cloud",
+   "fog"
+  ],
+  "fit": "mat",
+  "url": "https://upload.wikimedia.org/wikipedia/commons/1/15/Camille_Pissarro_-_Boulevard_Montmartre_-_Eremitage.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+  "source": "File:Camille Pissarro - Boulevard Montmartre - Eremitage.jpg",
+  "license": "Public domain",
+  "artist": "Camille Pissarro"
+ },
+ {
+  "id": "montmartre-night",
+  "kind": "painting",
+  "caption": "몽마르트르 대로의 밤, 카미유 피사로",
+  "times": [
+   "night"
+  ],
+  "seasons": [
+   "any"
+  ],
+  "weather": [
+   "rain",
+   "cloud"
+  ],
+  "fit": "mat",
+  "url": "https://upload.wikimedia.org/wikipedia/commons/1/14/Camille_Pissarro_-_Boulevard_Montmartre_at_Night_-_c_1897_-_National_Gallery_UK.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+  "source": "File:Camille Pissarro - Boulevard Montmartre at Night - c 1897 - National Gallery UK.jpg",
+  "license": "Public domain",
+  "artist": "Camille Pissarro"
+ },
+ {
+  "id": "louveciennes-snow",
+  "kind": "painting",
+  "caption": "루브시엔의 눈, 알프레드 시슬레",
+  "times": [
+   "morning",
+   "day"
+  ],
+  "seasons": [
+   "winter"
+  ],
+  "weather": [
+   "snow",
+   "cloud"
+  ],
+  "fit": "mat",
+  "url": "https://upload.wikimedia.org/wikipedia/commons/b/b2/Alfred_Sisley_-_Louveciennes_in_the_Snow.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+  "source": "File:Alfred Sisley - Louveciennes in the Snow.jpg",
+  "license": "Public domain",
+  "artist": "Alfred Sisley"
+ },
+ {
+  "id": "ninth-wave",
+  "kind": "painting",
+  "caption": "아홉 번째 파도, 이반 아이바좁스키",
+  "times": [
+   "dawn",
+   "sunset"
+  ],
+  "seasons": [
+   "any"
+  ],
+  "weather": [
+   "any"
+  ],
+  "fit": "mat",
+  "url": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Hovhannes_Aivazovsky_-_The_Ninth_Wave_-_Google_Art_Project.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+  "source": "File:Hovhannes Aivazovsky - The Ninth Wave - Google Art Project.jpg",
+  "license": "Public domain",
+  "artist": "Hovhannes Aivazovsky (1817 - 1900) – painter (Russian) Born in Rossiiskaya imper"
+ },
+ {
+  "id": "hay-wain",
+  "kind": "painting",
+  "caption": "건초 마차, 존 컨스터블",
+  "times": [
+   "day"
+  ],
+  "seasons": [
+   "summer"
+  ],
+  "weather": [
+   "cloud"
+  ],
+  "fit": "mat",
+  "url": "https://upload.wikimedia.org/wikipedia/commons/9/96/John-constable-the-hay-wain.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+  "source": "File:John-constable-the-hay-wain.jpg",
+  "license": "CC0",
+  "artist": "John Constable"
+ }
+]
