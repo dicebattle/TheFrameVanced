@@ -5,6 +5,7 @@ Picks an image that matches the local time of day, weather and season, prints a
 small caption on it and shows it in Art Mode.
 """
 import argparse
+import fcntl
 import json
 import random
 import re
@@ -528,6 +529,29 @@ def push_to_tv(cfg, path, state, cleanup, profile, show_at=None, art_mode_only=F
         tv.close()
 
 
+def read_art_mode(cfg):
+    """True or False, or None when the TV does not answer."""
+    if not tv_reachable(cfg["tv_host"]):
+        return None
+    from samsungtvws import SamsungTVWS
+
+    tv = SamsungTVWS(cfg["tv_host"], port=8002, name="TheFrameVanced", timeout=6, key_press_delay=0)
+    try:
+        return tv.art().get_artmode() == "on"
+    except Exception:
+        return None
+    finally:
+        try:
+            tv.close()
+        except Exception:
+            pass
+
+
+def returned_to_art_mode(before, now):
+    """Art Mode just came on. Nothing is concluded from the very first reading."""
+    return now is True and before in (False, None)
+
+
 def print_report(cfg, profile):
     """A table to paste into a compatibility report. Leaves out the TV's address."""
     from samsungtvws import SamsungTVWS
@@ -556,6 +580,15 @@ def next_clock_time(now, every):
     if moment != now:
         moment += timedelta(minutes=1)
     return moment + timedelta(minutes=-moment.minute % every)
+
+
+def clock_is_stale(state, now, every):
+    """True when the time on the wall is older than the latest mark on the clock's grid."""
+    if not state.get("clock_shown"):
+        return True
+    moment = now.replace(second=0, microsecond=0)
+    latest = moment - timedelta(minutes=moment.minute % every)
+    return datetime.fromisoformat(state["clock_shown"]) < latest
 
 
 def wait_until(moment):
@@ -588,6 +621,7 @@ def main():
     parser.add_argument("--force", action="store_true", help="change the image now")
     parser.add_argument("--image", help="use this catalog id instead of choosing one")
     parser.add_argument("--report", action="store_true", help="print what works on this TV")
+    parser.add_argument("--returned", action="store_true", help="the TV just came back to Art Mode")
     args = parser.parse_args()
     signal.alarm(RUN_TIMEOUT_SECONDS)
 
@@ -597,18 +631,29 @@ def main():
     if args.report:
         print_report(cfg, profile)
         return
+    # A run can wait for the top of the minute, so a second one may start meanwhile.
+    run_lock = (args.data / ".run.lock").open("w")
+    try:
+        fcntl.flock(run_lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except BlockingIOError:
+        print("another run is in progress")
+        return
     catalog = load_json(args.data / "library" / "catalog.json", [])
     state_path = args.data / "state.json"
     state = load_json(state_path, {})
     now = datetime.now(ZoneInfo(cfg["timezone"]))
     ctx = build_context(cfg, now)
     every = cfg.get("clock_minutes") or 0
-    show_at = next_clock_time(now, every) if every else None
+    # Only the regular run waits for the mark. Anything asked for now happens now.
+    show_at = next_clock_time(now, every) if every and not (args.force or args.image or args.returned) else None
     ctx["time"] = f"{show_at or now:%H:%M}"
     print(now.isoformat(timespec="minutes"), json.dumps(ctx, ensure_ascii=False), flush=True)
 
     reason = "forced" if args.force or args.image else needs_change(cfg, ctx, state, now)
-    clock_only = not reason and every and state.get("clock_shown") != show_at.isoformat()
+    if args.returned:
+        clock_only = not reason and every and clock_is_stale(state, now, every)
+    else:
+        clock_only = not reason and show_at and state.get("clock_shown") != show_at.isoformat()
     if not reason and not clock_only:
         print("no change needed")
         return
@@ -647,8 +692,8 @@ def main():
     finally:
         state_path.write_text(json.dumps(state, ensure_ascii=False, indent=1))
         profile_path.write_text(json.dumps(profile, ensure_ascii=False, indent=1))
-    if show_at and new_id:
-        state["clock_shown"] = show_at.isoformat()
+    if every and new_id:
+        state["clock_shown"] = (show_at or now).isoformat()
     if reason:
         state.update(
             last_change=now.isoformat(),

@@ -3,6 +3,7 @@ import tempfile
 import unittest
 from datetime import datetime, timedelta
 from pathlib import Path
+from unittest import mock
 from zoneinfo import ZoneInfo
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -213,6 +214,25 @@ class Clock(unittest.TestCase):
         new_id = frame.update_tv(art, self.image, state, True, {})
         self.assertEqual(len(art.deleted), 41)
         self.assertEqual(state["uploaded"], [new_id])
+
+    def test_coming_back_is_noticed_once(self):
+        cases = {
+            ("first reading", True): False, (True, True): False, (False, False): False,
+            (True, False): False, (None, None): False, (False, True): True, (None, True): True,
+        }
+        for (before, now), expected in cases.items():
+            self.assertEqual(frame.returned_to_art_mode(before, now), expected, (before, now))
+
+    def test_time_on_the_wall_is_stale_after_the_next_mark(self):
+        now = datetime(2026, 11, 2, 14, 7, 30, tzinfo=KST)
+        shown = {"clock_shown": now.replace(minute=5, second=0).isoformat()}
+        self.assertFalse(frame.clock_is_stale(shown, now, 5))
+        self.assertTrue(frame.clock_is_stale({"clock_shown": now.replace(minute=0, second=0).isoformat()}, now, 5))
+        self.assertTrue(frame.clock_is_stale({}, now, 5))
+
+    def test_tv_without_an_answer_reads_as_none(self):
+        with mock.patch.object(frame, "tv_reachable", return_value=False):
+            self.assertIsNone(frame.read_art_mode({"tv_host": "x"}))
 
     def test_time_can_go_in_the_caption(self):
         cfg = {"location_label": "서울"}
