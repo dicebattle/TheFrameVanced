@@ -10,6 +10,7 @@ import random
 import re
 import signal
 import socket
+import ssl
 import urllib.parse
 import urllib.request
 from datetime import datetime, timedelta
@@ -29,6 +30,8 @@ FONT_PATHS = {
 FONT_INDEX_KR = 1
 # Text sizes are stored for a 75 inch TV and scaled so the printed size stays the same on any TV.
 REFERENCE_INCHES = 75
+# Small TVs are watched from closer, so the size is not matched all the way down.
+MAX_TEXT_SCALE = 1.8
 # Keeps text inside the screen edge, whatever its size.
 EDGE_MARGIN = 96
 # Relative luminance (0-1) from which dark text reads better than light text.
@@ -328,7 +331,7 @@ def inches_from_model(model):
 
 def effective_layout(cfg):
     layout = {**DEFAULT_LAYOUT, **cfg.get("layout", {})}
-    scale = REFERENCE_INCHES / (cfg.get("tv_inches") or REFERENCE_INCHES)
+    scale = min(MAX_TEXT_SCALE, REFERENCE_INCHES / (cfg.get("tv_inches") or REFERENCE_INCHES))
     for key in ("headline_size", "caption_size", "line_gap"):
         layout[key] = round(layout[key] * scale)
     return layout
@@ -345,8 +348,18 @@ def compose(item, ctx, cfg, data_dir):
     return draw_caption(image, caption_lines(item, ctx, cfg, layout), layout)
 
 
-def render(item, ctx, cfg, data_dir, out_path):
-    compose(item, ctx, cfg, data_dir).save(out_path, quality=90, optimize=True)
+def output_size(resolution):
+    """The TV's own resolution when it is lower than the 4K canvas."""
+    match = re.fullmatch(r"(\d{3,4})x(\d{3,4})", resolution or "")
+    size = (int(match[1]), int(match[2])) if match else CANVAS
+    return size if size[0] < CANVAS[0] else CANVAS
+
+
+def render(item, ctx, cfg, data_dir, out_path, size=CANVAS):
+    image = compose(item, ctx, cfg, data_dir)
+    if size != CANVAS:
+        image = image.resize(size, Image.LANCZOS)
+    image.save(out_path, quality=90, optimize=True)
 
 
 def ping_port(host, port, timeout=1.0):
@@ -361,35 +374,153 @@ def tv_reachable(host):
     return ping_port(host, 8002, timeout=3)
 
 
-def push_to_tv(cfg, path, state, cleanup):
+def tv_info(host, timeout=3):
+    """Read the TV's device card. Needs no pairing and shows nothing on the TV."""
+    insecure = ssl.create_default_context()
+    insecure.check_hostname = False
+    insecure.verify_mode = ssl.CERT_NONE  # TVs use a self-signed certificate.
+    for url, context in ((f"http://{host}:8001/api/v2/", None), (f"https://{host}:8002/api/v2/", insecure)):
+        try:
+            with urllib.request.urlopen(url, timeout=timeout, context=context) as r:
+                device = json.load(r).get("device", {})
+        except (OSError, ValueError):
+            continue
+        return {
+            "host": host,
+            "model": device.get("modelName"),
+            "name": device.get("name"),
+            "frame": str(device.get("FrameTVSupport")).lower() == "true",
+            "power": device.get("PowerState"),
+            "network": device.get("networkType"),
+            "resolution": device.get("resolution"),
+        }
+    return None
+
+
+def record(profile, feature, ok, detail=""):
+    """Remember what worked on this TV. ok is True, False, or None when it could not be told."""
+    profile.setdefault("features", {})[feature] = {
+        "ok": ok,
+        "detail": str(detail)[:160],
+        "at": datetime.now().isoformat(timespec="minutes"),
+    }
+
+
+def feature_failed(profile, feature):
+    return profile.get("features", {}).get(feature, {}).get("ok") is False
+
+
+def my_images(art):
+    """Images uploaded to the TV. The folder id is not the same on every model."""
+    try:
+        rows = art.available(category="MY-C0002")
+    except Exception:
+        rows = art.available()
+    return {str(i.get("content_id")) for i in rows if str(i.get("content_id", "")).startswith("MY_")}
+
+
+def check_tv(art, profile):
+    """Read-only checks, one at a time, so that one unsupported call does not hide the rest."""
+    found = {}
+    for key, feature, read in (
+        ("art_mode", "read_status", art.get_artmode),
+        ("current", None, lambda: art.get_current().get("content_id")),
+        ("api_version", None, art.get_api_version),
+        ("uploaded", "list_images", lambda: len(my_images(art))),
+    ):
+        try:
+            found[key] = read()
+        except Exception as e:
+            found[key] = None
+            if feature:
+                record(profile, feature, False, f"{type(e).__name__}: {e}")
+        else:
+            if feature:
+                record(profile, feature, True)
+    return found
+
+
+def update_tv(art, path, state, cleanup, profile):
+    art_on = art.get_artmode() == "on"
+    record(profile, "read_status", True)
+    before = my_images(art)
+    uploaded = state.setdefault("uploaded", [])
+    try:
+        new_id = art.upload(path.read_bytes(), file_type="JPEG", matte="none", portrait_matte="none")
+    except Exception as e:
+        # Some models store the image but never send the confirmation.
+        found = my_images(art) - before
+        if len(found) != 1:
+            record(profile, "upload", False, f"{type(e).__name__}: {e}")
+            raise
+        new_id = found.pop()
+    record(profile, "upload", True)
+    uploaded.append(new_id)
+
+    # Never call set_artmode here: on some models it does not reply and blocks forever.
+    art.select_image(new_id, show=art_on)
+    current = art.get_current().get("content_id")
+    shown = current == new_id
+    if shown:
+        record(profile, "show", True)
+    elif art_on:
+        record(profile, "show", False, f"TV shows {current}, expected {new_id}")
+    else:
+        # Outside Art Mode some models only report the new image once they return to it.
+        record(profile, "show", None, "could not be confirmed outside Art Mode")
+    print(f"shown={shown} {new_id} art_mode={art_on}", flush=True)
+
+    # Only ever remove images this program uploaded, and only once the new one is confirmed.
+    stale = [i for i in uploaded if i != new_id and i.startswith("MY_")]
+    if not stale:
+        return new_id
+    if not cleanup or not shown or feature_failed(profile, "delete"):
+        print(f"keeping {len(stale)} old image(s)", flush=True)
+        return new_id
+    try:
+        answer = art.delete_list(stale)
+    except Exception as e:
+        record(profile, "delete", False, f"{type(e).__name__}: {e}")
+        return new_id
+    # Firmwares word the reply differently, so look at what is really left on the TV.
+    left = set(stale) & my_images(art)
+    print(f"cleanup {stale} answer={answer} left={sorted(left)}", flush=True)
+    record(profile, "delete", not left, f"still on the TV: {sorted(left)}" if left else "")
+    state["uploaded"] = [new_id] + sorted(left)
+    return new_id
+
+
+def push_to_tv(cfg, path, state, cleanup, profile):
     # Imported here so that dry runs work without the TV library.
     from samsungtvws import SamsungTVWS
 
     tv = SamsungTVWS(cfg["tv_host"], port=8002, name="TheFrameVanced", timeout=30)
-    art = tv.art()
     try:
-        art_on = art.get_artmode() == "on"
-        new_id = art.upload(path.read_bytes(), file_type="JPEG", matte="none", portrait_matte="none")
-        uploaded = state.setdefault("uploaded", [])
-        uploaded.append(new_id)
-        # Never call set_artmode here: on some models it does not reply and blocks forever.
-        art.select_image(new_id, show=art_on)
-        current = art.get_current().get("content_id")
-        if current != new_id:
-            raise RuntimeError(f"TV shows {current}, expected {new_id}")
-        print(f"shown {new_id} art_mode={art_on}", flush=True)
-        # Only ever remove images this program uploaded, never the one on screen.
-        stale = [i for i in uploaded if i != new_id and i.startswith("MY_")]
-        if stale and cleanup:
-            ok = art.delete_list(stale)
-            print(f"cleanup {stale} ok={ok}", flush=True)
-            if ok:
-                state["uploaded"] = [new_id]
-        elif stale:
-            print(f"cleanup disabled, keeping {len(stale)} old image(s)", flush=True)
-        return new_id
+        return update_tv(tv.art(), path, state, cleanup, profile)
     finally:
         tv.close()
+
+
+def print_report(cfg, profile):
+    """A table to paste into a compatibility report. Leaves out the TV's address."""
+    from samsungtvws import SamsungTVWS
+
+    info = tv_info(cfg["tv_host"]) or {}
+    found = {}
+    if tv_reachable(cfg["tv_host"]):
+        tv = SamsungTVWS(cfg["tv_host"], port=8002, name="TheFrameVanced", timeout=10)
+        try:
+            found = check_tv(tv.art(), profile)
+        finally:
+            tv.close()
+    names = {True: "works", False: "fails", None: "unknown"}
+    print(f'| Model | {info.get("model")} |\n|---|---|')
+    print(f'| Frame support | {info.get("frame")} |')
+    print(f'| Art API | {found.get("api_version")} |')
+    print(f'| Resolution | {info.get("resolution")} |')
+    for feature in ("read_status", "list_images", "upload", "show", "delete"):
+        entry = profile.get("features", {}).get(feature, {})
+        print(f'| {feature} | {names[entry.get("ok")] if entry else "not tried"} {entry.get("detail", "")} |')
 
 
 def needs_change(cfg, ctx, state, now):
@@ -415,10 +546,16 @@ def main():
     parser.add_argument("--dry-run", action="store_true", help="render a preview, do not touch the TV")
     parser.add_argument("--force", action="store_true", help="change the image now")
     parser.add_argument("--image", help="use this catalog id instead of choosing one")
+    parser.add_argument("--report", action="store_true", help="print what works on this TV")
     args = parser.parse_args()
     signal.alarm(RUN_TIMEOUT_SECONDS)
 
     cfg = load_json(args.data / "config.json", None)
+    profile_path = args.data / "tv_profile.json"
+    profile = load_json(profile_path, {})
+    if args.report:
+        print_report(cfg, profile)
+        return
     catalog = load_json(args.data / "library" / "catalog.json", [])
     state_path = args.data / "state.json"
     state = load_json(state_path, {})
@@ -433,6 +570,12 @@ def main():
     if not args.dry_run and not tv_reachable(cfg["tv_host"]):
         print("TV is in standby, will retry on the next tick")
         return
+    info = None if args.dry_run else tv_info(cfg["tv_host"])
+    if info:
+        if not info["frame"]:
+            print(f'{info["model"]} does not report Art Mode support, nothing to do')
+            return
+        cfg.setdefault("tv_inches", inches_from_model(info["model"]))
 
     if args.image:
         item = next(i for i in catalog if i["id"] == args.image)
@@ -442,16 +585,17 @@ def main():
     out_dir = args.data / "output"
     out_dir.mkdir(exist_ok=True)
     out_path = out_dir / ("preview.jpg" if args.dry_run else "current.jpg")
-    render(item, ctx, cfg, args.data, out_path)
+    render(item, ctx, cfg, args.data, out_path, output_size((info or {}).get("resolution")))
     if args.dry_run:
         print(f"preview written to {out_path}")
         return
 
     # Save the upload list even if a later step fails, so cleanup still knows about the file.
     try:
-        push_to_tv(cfg, out_path, state, cleanup=(args.data / "cleanup.enabled").exists())
+        push_to_tv(cfg, out_path, state, (args.data / "cleanup.enabled").exists(), profile)
     finally:
         state_path.write_text(json.dumps(state, ensure_ascii=False, indent=1))
+        profile_path.write_text(json.dumps(profile, ensure_ascii=False, indent=1))
     state.update(
         last_change=now.isoformat(),
         band=ctx["band"],

@@ -21,6 +21,7 @@ from PIL import Image
 
 import frame
 import sources
+import updater
 
 HERE = Path(__file__).resolve().parent
 SERVICE = "theframevanced"
@@ -95,7 +96,9 @@ def save_config():
     with write_lock:
         cfg = read_json("config.json", {})
         layout = body.pop("layout", None)
-        allowed = {"tv_host", "tv_inches", "change_minutes", "min_weather_change_minutes", "disabled_themes"}
+        allowed = {
+            "tv_host", "tv_inches", "change_minutes", "min_weather_change_minutes", "disabled_themes", "auto_update",
+        }
         if body.get("tv_host") not in (None, cfg.get("tv_host")):
             # A different TV may have a different size: read it again from its model name.
             cfg.pop("tv_inches", None)
@@ -253,41 +256,21 @@ def delete_source(source_id):
     return jsonify(ok=True)
 
 
-def rest_info(host, timeout=3):
-    try:
-        with urllib.request.urlopen(f"http://{host}:8001/api/v2/", timeout=timeout) as r:
-            device = json.load(r).get("device", {})
-    except (OSError, ValueError):
-        return None
-    return {
-        "host": host,
-        "model": device.get("modelName"),
-        "name": device.get("name"),
-        "frame": device.get("FrameTVSupport") == "true",
-        "power": device.get("PowerState"),
-        "network": device.get("networkType"),
-    }
-
-
-def art_info(host):
+def art_info(host, profile):
     from samsungtvws import SamsungTVWS
 
     result = {}
 
     def query():
         tv = SamsungTVWS(host, port=8002, name="TheFrameVanced", timeout=6)
-        art = tv.art()
         try:
-            result["art_mode"] = art.get_artmode()
-            result["current"] = art.get_current().get("content_id")
-            result["api_version"] = art.get_api_version()
-            result["uploaded"] = len(art.available(category="MY-C0002"))
+            result.update(frame.check_tv(tv.art(), profile))
         finally:
             tv.close()
 
     worker = threading.Thread(target=query, daemon=True)
     worker.start()
-    worker.join(10)
+    worker.join(12)
     return result
 
 
@@ -295,22 +278,64 @@ def art_info(host):
 def tv_status():
     cfg = read_json("config.json", {})
     host = cfg.get("tv_host")
+    profile = read_json("tv_profile.json", {})
     if not host:
-        return jsonify(reachable=False, host=None, standby=False)
-    info = rest_info(host)
+        return jsonify(reachable=False, host=None, standby=False, profile=profile)
+    info = frame.tv_info(host)
     if not info:
-        return jsonify(reachable=False, host=host, standby=frame.ping_port(host, 7678))
-    try:
-        info.update(art_info(host))
-    except Exception as e:
-        info["art_error"] = str(e)[:160]
+        return jsonify(reachable=False, host=host, standby=frame.ping_port(host, 7678), profile=profile)
+    if info["frame"]:
+        try:
+            info.update(art_info(host, profile))
+        except Exception as e:
+            info["art_error"] = str(e)[:160]
+        write_json("tv_profile.json", profile)
     inches = frame.inches_from_model(info["model"])
     if inches and "tv_inches" not in cfg:
         with write_lock:
             fresh = read_json("config.json", {})
             fresh["tv_inches"] = cfg["tv_inches"] = inches
             write_json("config.json", fresh)
-    return jsonify(reachable=True, tv_inches=cfg.get("tv_inches"), **info)
+    return jsonify(reachable=True, tv_inches=cfg.get("tv_inches"), profile=profile, **info)
+
+
+def update_status():
+    return {
+        "version": updater.current_version(),
+        "managed": updater.install_root() is not None,
+        "auto": read_json("config.json", {}).get("auto_update") is True,
+        "status": read_json("update_status.json", {}),
+    }
+
+
+@app.get("/api/update")
+def get_update():
+    return jsonify(update_status())
+
+
+@app.post("/api/update/check")
+def check_update():
+    try:
+        release = updater.newer_release(updater.current_version())
+    except (updater.UpdateError, OSError, ValueError, KeyError) as e:
+        return jsonify({**update_status(), "error": f"확인하지 못했습니다: {str(e)[:120]}"})
+    return jsonify({**update_status(), "latest": release["tag"] if release else None})
+
+
+@app.post("/api/update/install")
+def install_update():
+    if updater.install_root() is None:
+        return jsonify(ok=False, error="install.sh로 설치한 경우에만 스스로 업데이트할 수 있습니다"), 400
+    # The update restarts this page, so it has to run outside of it.
+    run = systemctl("start", "--no-block", f"{SERVICE}-update-now.service")
+    return jsonify(ok=run.returncode == 0, error=run.stderr[-200:])
+
+
+@app.post("/api/tv/retest")
+def retest_tv():
+    """Forget past results, so that features switched off after a failure are tried again."""
+    write_json("tv_profile.json", {})
+    return jsonify(ok=True)
 
 
 @app.post("/api/tv/discover")
@@ -322,7 +347,7 @@ def discover():
     hosts = [f"{prefix}.{i}" for i in range(1, 255)]
     with cf.ThreadPoolExecutor(64) as pool:
         open_hosts = [h for h, ok in zip(hosts, pool.map(lambda h: frame.ping_port(h, 8001), hosts)) if ok]
-        found = [i for i in pool.map(rest_info, open_hosts) if i]
+        found = [i for i in pool.map(frame.tv_info, open_hosts) if i]
     return jsonify(found)
 
 

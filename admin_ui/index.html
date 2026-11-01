@@ -110,6 +110,11 @@ dl.facts dd { margin: 0; font-family: var(--mono); font-size: 12.5px; word-break
 .search { display: flex; gap: 6px; }
 .search input { flex: 1; min-width: 0; background: #fff; border: 1px solid var(--hair); padding: 7px 9px; }
 .region-now { font-size: 13px; margin: 8px 0 0; }
+.feature { display: grid; grid-template-columns: 1fr auto; gap: 1px 10px; padding: 6px 0; border-top: 1px solid var(--hair); font-size: 13.5px; }
+.feature b { font: 500 12.5px var(--mono); color: var(--ink-soft); }
+.feature b[data-state="ok"] { color: var(--ok); }
+.feature b[data-state="fail"] { color: var(--warn); }
+.feature small { grid-column: 1 / -1; color: var(--ink-soft); font-size: 12px; word-break: break-word; }
 .tv-row { display: flex; justify-content: space-between; gap: 8px; align-items: center; padding: 7px 0; border-top: 1px solid var(--hair); font-size: 13px; }
 .switch { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; align-items: start; padding: 10px 0; border-top: 1px solid var(--hair); cursor: pointer; }
 .switch input { margin-top: 4px; accent-color: var(--brass); width: 16px; height: 16px; }
@@ -237,6 +242,10 @@ dl.facts dd { margin: 0; font-family: var(--mono); font-size: 12.5px; word-break
       </div>
       <div class="notice" id="tvNotice" aria-live="polite"></div>
       <div id="tvFound"></div>
+      <h2>이 TV에서 되는 기능</h2>
+      <p class="hint">실제로 시도한 결과를 기억합니다. 안 되는 기능은 자동으로 피합니다.</p>
+      <div id="tvFeatures"></div>
+      <div class="actions" style="margin-top:10px"><button class="btn" id="tvRetest">기록 지우고 다시 시험</button></div>
       <h2>TV 크기</h2>
       <label class="field"><span>인치</span><input type="number" id="tv_inches" min="32" max="115" step="1"></label>
       <p class="hint">모델명에서 자동으로 읽습니다. 글자가 TV 크기와 상관없이 같은 실제 크기로 보이도록 맞춥니다.</p>
@@ -267,6 +276,15 @@ dl.facts dd { margin: 0; font-family: var(--mono); font-size: 12.5px; word-break
       <h2>자동 실행</h2>
       <label class="switch"><input type="checkbox" id="timerToggle"><b>자동 교체 켜기</b><small>10분마다 확인하고, 시간대나 날씨가 바뀌거나 기본 간격이 지나면 그림을 바꿉니다. TV가 대기 상태면 건너뜁니다.</small></label>
       <label class="switch"><input type="checkbox" id="cleanupToggle"><b>이전 이미지 자동 삭제</b><small>새 이미지가 화면에 표시된 것을 확인한 뒤, 이 프로그램이 올린 이전 이미지를 TV에서 영구 삭제합니다. 직접 올린 사진과 기본 작품은 지우지 않습니다.</small></label>
+      <p class="hint" id="cleanupBlocked" hidden>이 TV에서 삭제가 실패해 꺼 두었습니다. TV 탭에서 기록을 지우면 다시 시험합니다.</p>
+      <h2>버전</h2>
+      <p class="region-now" id="versionNow"></p>
+      <div class="notice" id="updateNotice" aria-live="polite"></div>
+      <div class="actions" style="margin-top:6px">
+        <button class="btn" id="updateCheck">새 버전 확인</button>
+        <button class="btn primary" id="updateInstall" hidden>지금 업데이트</button>
+      </div>
+      <label class="switch" style="margin-top:12px"><input type="checkbox" id="autoUpdate"><b>자동 업데이트</b><small>하루 한 번 새 릴리즈를 확인해 설치합니다. 시험을 통과한 버전만 적용하고, 문제가 생기면 이전 버전으로 되돌립니다.</small></label>
       <h2>최근 기록</h2>
       <div class="log" id="log">기록이 없습니다</div>
     </div>
@@ -520,10 +538,36 @@ function facts(rows) {
     dt.textContent = k; dd.textContent = v ?? "—"; dl.append(dt, dd);
   }
 }
+const FEATURES = { read_status: "아트모드 상태 읽기", list_images: "올린 이미지 목록", upload: "이미지 올리기", show: "작품 바꾸기", delete: "이전 이미지 삭제" };
+function showFeatures(profile) {
+  const host = $("tvFeatures"); host.innerHTML = "";
+  const done = profile?.features ?? {};
+  for (const [key, label] of Object.entries(FEATURES)) {
+    const entry = done[key];
+    const row = document.createElement("div"); row.className = "feature";
+    row.innerHTML = "<span></span><b></b>";
+    row.querySelector("span").textContent = label;
+    const state = row.querySelector("b");
+    state.textContent = !entry ? "아직 시험 전" : entry.ok === true ? "됨" : entry.ok === false ? "안 됨" : "확인 못 함";
+    state.dataset.state = entry?.ok === true ? "ok" : entry?.ok === false ? "fail" : "";
+    if (entry?.detail) { const note = document.createElement("small"); note.textContent = entry.detail; row.append(note); }
+    host.append(row);
+  }
+  const blocked = done.delete?.ok === false;
+  $("cleanupToggle").disabled = blocked;
+  $("cleanupBlocked").hidden = !blocked;
+}
 async function refreshTv() {
   notify("tvNotice", "TV를 확인하는 중입니다");
   try {
     const tv = await api("/api/tv");
+    showFeatures(tv.profile);
+    if (tv.reachable && !tv.frame) {
+      setPill("off", "아트모드 미지원 TV");
+      facts([["주소", tv.host], ["모델", tv.model]]);
+      notify("tvNotice", "이 TV는 아트모드를 지원하지 않아 액자로 쓸 수 없습니다. 더 프레임 TV를 고르세요.", "err");
+      return;
+    }
     if (!tv.reachable) {
       setPill(tv.standby ? "standby" : "off", tv.standby ? "TV 대기 상태" : "TV에 연결되지 않음");
       facts([["주소", tv.host], ["상태", tv.standby ? "대기 상태" : "응답 없음"]]);
@@ -533,7 +577,7 @@ async function refreshTv() {
     const art = tv.art_mode === "on" ? "켜짐" : tv.art_mode === "off" ? "꺼짐" : "확인 못 함";
     setPill("on", `${tv.model || "TV"} · 아트모드 ${art}`);
     if (tv.tv_inches) $("tv_inches").value = tv.tv_inches;
-    facts([["주소", tv.host], ["모델", tv.model], ["TV 크기", tv.tv_inches ? `${tv.tv_inches}인치` : "입력 필요"], ["더 프레임 지원", tv.frame ? "예" : "아니요"], ["전원", tv.power], ["연결", tv.network], ["아트모드", art], ["현재 작품", tv.current], ["Art API", tv.api_version], ["올린 사진", tv.uploaded]]);
+    facts([["주소", tv.host], ["모델", tv.model], ["TV 크기", tv.tv_inches ? `${tv.tv_inches}인치` : "입력 필요"], ["해상도", tv.resolution], ["더 프레임 지원", tv.frame ? "예" : "아니요"], ["전원", tv.power], ["연결", tv.network], ["아트모드", art], ["현재 작품", tv.current], ["Art API", tv.api_version], ["올린 사진", tv.uploaded]]);
     notify("tvNotice", tv.art_error ? `아트모드 정보를 읽지 못했습니다: ${tv.art_error}` : "", tv.art_error ? "err" : "ok");
   } catch (e) { notify("tvNotice", e.message, "err"); setPill("off", "상태 확인 실패"); }
 }
@@ -546,6 +590,40 @@ async function useRegion(query, place) {
   const out = await api("/api/location", { query, ...place });
   showRegion(place.name, out.timezone);
   S.real = await api("/api/context"); S.ctx = { ...S.real }; syncChips(); preview();
+}
+let updatePoll;
+async function refreshUpdate(extra) {
+  const u = extra ?? await api("/api/update");
+  $("versionNow").textContent = `현재 버전: v${u.version}`;
+  $("autoUpdate").checked = u.auto;
+  $("autoUpdate").disabled = !u.managed;
+  $("updateInstall").hidden = !u.managed || !(u.latest ?? u.status?.latest);
+  const installing = u.status?.state === "installing";
+  $("updateInstall").disabled = installing;
+  const text = u.error ?? (u.managed ? u.status?.message : "install.sh로 설치하면 스스로 업데이트할 수 있습니다.");
+  notify("updateNotice", text ?? "", u.error || u.status?.state === "error" ? "err" : u.status?.state === "done" ? "ok" : "");
+  clearTimeout(updatePoll);
+  if (installing) updatePoll = setTimeout(() => refreshUpdate().catch(() => { updatePoll = setTimeout(refreshUpdate, 4000); }), 3000);
+}
+function setupUpdate() {
+  $("updateCheck").addEventListener("click", async () => {
+    notify("updateNotice", "확인하는 중입니다");
+    const u = await api("/api/update/check", {});
+    if (!u.error && !u.latest) u.status = { message: `최신 버전입니다 (v${u.version})` };
+    if (u.latest) u.status = { message: `새 버전 ${u.latest}이 있습니다`, latest: u.latest };
+    refreshUpdate(u);
+  });
+  $("updateInstall").addEventListener("click", async () => {
+    const res = await fetch("/api/update/install", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" });
+    const out = await res.json();
+    if (!out.ok) { notify("updateNotice", out.error, "err"); return; }
+    notify("updateNotice", "업데이트를 시작했습니다. 잠시 뒤 페이지가 다시 시작됩니다.", "ok");
+    updatePoll = setTimeout(refreshUpdate, 3000);
+  });
+  $("autoUpdate").addEventListener("change", async (e) => {
+    await api("/api/config", { auto_update: e.target.checked });
+    notify("updateNotice", e.target.checked ? "자동 업데이트를 켰습니다." : "자동 업데이트를 껐습니다.", "ok");
+  });
 }
 function setupRegion() {
   $("regionForm").addEventListener("submit", async (e) => {
@@ -596,6 +674,7 @@ function setupActions() {
     b.disabled = false;
   });
   $("tvRefresh").addEventListener("click", refreshTv);
+  $("tvRetest").addEventListener("click", async () => { await api("/api/tv/retest", {}); refreshTv(); });
   $("tvDiscover").addEventListener("click", async () => {
     notify("tvNotice", "같은 네트워크를 찾는 중입니다");
     const list = await api("/api/tv/discover", {});
@@ -633,7 +712,7 @@ function setupActions() {
 }
 async function load() {
   chips($("bandChips"), BANDS, "band"); chips($("weatherChips"), WEATHER, "weather");
-  setupDrag(); setupGrid9(); setupTokens(); setupActions(); setupRegion(); setupSources();
+  setupDrag(); setupGrid9(); setupTokens(); setupActions(); setupRegion(); setupSources(); setupUpdate();
   const st = await api("/api/state");
   S.layout = { ...st.layout }; S.saved = JSON.stringify(S.layout);
   S.real = await api("/api/context"); S.ctx = { ...S.real };
@@ -644,7 +723,7 @@ async function load() {
   showRegion(st.config.location_detail ?? st.config.location_label, st.config.timezone);
   $("timerToggle").checked = st.timer; $("cleanupToggle").checked = st.cleanup;
   S.catalog = st.catalog; S.disabled = st.config.disabled_themes ?? [];
-  bindLayout(); syncChips(); renderThemes(); renderGallery(); refreshSources(); drawPreview(); refreshTv();
+  bindLayout(); syncChips(); renderThemes(); renderGallery(); refreshSources(); refreshUpdate(); drawPreview(); refreshTv();
 }
 load().catch((e) => notify("textNotice", e.message, "err"));
 </script>

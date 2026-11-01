@@ -1,0 +1,8 @@
+[Unit]
+Description=TheFrameVanced update check
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=%h/TheFrameVanced/.venv/bin/python %h/TheFrameVanced/current/updater.py --auto
+TimeoutStartSec=900

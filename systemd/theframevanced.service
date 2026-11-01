@@ -4,5 +4,5 @@ After=network-online.target
 
 [Service]
 Type=oneshot
-ExecStart=%h/TheFrameVanced/.venv/bin/python -W ignore %h/TheFrameVanced/frame.py --data %h/TheFrameVanced/data
+ExecStart=%h/TheFrameVanced/.venv/bin/python -W ignore %h/TheFrameVanced/current/frame.py --data %h/TheFrameVanced/data
 TimeoutStartSec=180

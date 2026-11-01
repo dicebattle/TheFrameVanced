@@ -58,7 +58,135 @@ Turns a Samsung The Frame TV into a living digital frame: it picks images that m
 
 ## 준비물
 
-- 아트모드를 지원하는 더 프레임 TV (2021년형 LS03A, Art API 2.03에서만 시험했습니다)
+- 아트모드를 지원하는 삼성 더 프레임 TV ([지원 범위](#지원하는-tv) 참고)
+- TV와 같은 네트워크에 있는 Linux 서버
+- Python 3.10 이상, `systemd`, Noto Sans CJK 글꼴 (`fonts-noto-cjk`)
+
+글꼴 경로는 Ubuntu 기준으로 `frame.py`의 `FONT_PATHS`에 들어 있습니다. 다른 배포판이면 이 값을 바꾸세요.
+
+## 설치
+
+```bash
+git clone https://github.com/dicebattle/TheFrameVanced.git /tmp/TheFrameVanced
+/tmp/TheFrameVanced/install.sh
+```
+
+`~/TheFrameVanced`에 설치하고 관리 페이지 서비스를 켭니다. 다른 위치에 설치하려면 `THEFRAMEVANCED_ROOT`를 지정하세요.
+
+| 위치 | 내용 |
+|---|---|
+| `versions/` | 설치된 버전들 |
+| `current` | 지금 쓰는 버전을 가리키는 링크 |
+| `data/` | 설정, 이미지, 실행 기록. 업데이트해도 그대로입니다 |
+| `.venv/` | Python 환경 |
+
+이미지를 내려받습니다. 소스별 요청 제한을 지키느라 시간이 걸릴 수 있습니다. 다시 실행하면 이어서 받습니다.
+
+```bash
+cd ~/TheFrameVanced
+.venv/bin/python current/tools/build_library.py current/library/manifest.json data/library
+```
+
+## 데몬으로 실행하기
+
+별도의 상주 프로그램을 직접 띄울 필요 없이, `systemd` 사용자 서비스로 돌아갑니다. 서버를 재부팅해도 자동으로 다시 시작합니다.
+
+| 서비스 | 하는 일 |
+|---|---|
+| `theframevanced.timer` | 10분마다 `theframevanced.service`를 실행 |
+| `theframevanced.service` | 교체가 필요한지 판단하고 TV에 반영한 뒤 종료 |
+| `theframevanced-admin.service` | 관리 페이지를 계속 실행 |
+| `theframevanced-update.timer` | 하루 한 번 새 버전 확인 |
+
+로그아웃한 뒤에도 서비스가 돌도록 한 번만 실행해 주세요. 자동 교체는 관리 페이지의 `자동 교체 켜기`로 켜고 끕니다.
+
+```bash
+loginctl enable-linger "$USER"
+```
+
+자주 쓰는 명령입니다.
+
+```bash
+systemctl --user status theframevanced.timer theframevanced-admin.service
+journalctl --user -u theframevanced -f
+systemctl --user disable --now theframevanced.timer
+systemctl --user restart theframevanced-admin.service
+```
+
+순서대로 상태 확인, 실행 기록 보기, 자동 교체 끄기, 관리 페이지 다시 시작입니다.
+
+서비스 없이 직접 실행할 수도 있습니다.
+
+```bash
+cd ~/TheFrameVanced
+.venv/bin/python current/frame.py --data data --dry-run --force
+.venv/bin/python current/frame.py --data data --force
+```
+
+`--dry-run`은 TV에 보내지 않고 `data/output/preview.jpg`만 만듭니다. `--force`는 조건과 상관없이 지금 교체합니다. `--image 이미지ID`로 특정 이미지를 고를 수 있습니다.
+
+## 업데이트
+
+`자동 교체` 탭의 `버전`에서 새 버전을 확인하고 설치합니다. `자동 업데이트`를 켜면 하루 한 번 스스로 설치합니다. 기본값은 꺼짐입니다.
+
+```bash
+~/TheFrameVanced/.venv/bin/python ~/TheFrameVanced/current/updater.py --check
+~/TheFrameVanced/.venv/bin/python ~/TheFrameVanced/current/updater.py --install
+```
+
+설치는 이 순서로 진행되고, 지금 쓰는 버전은 마지막까지 그대로 둡니다.
+
+1. [GitHub 릴리즈](https://github.com/dicebattle/TheFrameVanced/releases)에서 새 버전을 받아 체크섬을 확인합니다.
+2. 별도 폴더에 풀고 필요한 패키지를 설치합니다.
+3. 새 버전의 테스트를 돌립니다. 실패하면 여기서 멈춥니다.
+4. `current`를 새 버전으로 바꾸고 관리 페이지를 다시 시작합니다.
+5. 관리 페이지가 응답하지 않으면 이전 버전으로 되돌립니다.
+
+체크섬은 파일이 손상되지 않았는지 확인할 뿐, 릴리즈를 만든 사람을 증명하지는 않습니다. 자동 업데이트는 이 저장소의 릴리즈를 믿는다는 뜻이니, 원하지 않으면 끈 채로 직접 설치하세요.
+
+### 릴리즈 만들기
+
+`VERSION` 파일을 올리고 같은 버전의 태그를 올리면 GitHub Actions가 테스트 후 릴리즈를 만듭니다.
+
+```bash
+git tag v0.2.0
+git push origin v0.2.0
+```
+
+## 관리 페이지
+
+시간대를 고르면 벽 조명이 함께 바뀌고, 글자는 액자 위에서 직접 끌어 옮깁니다.
+
+| 글자 설정 | 글자 끌어서 옮기기 |
+|---|---|
+| ![글자 설정](docs/screenshots/admin-layout.jpg) | ![글자 끌기](docs/screenshots/admin-drag-caption.jpg) |
+
+| 테마 고르기 | 이미지 소스 추가 |
+|---|---|
+| ![테마 고르기](docs/screenshots/admin-images.jpg) | ![이미지 소스 추가](docs/screenshots/admin-sources.jpg) |
+
+| TV 연결 | 지역과 자동 교체 |
+|---|---|
+| ![TV 연결](docs/screenshots/admin-tv.jpg) | ![자동 교체](docs/screenshots/admin-auto.jpg) |
+
+휴대폰에서도 쓸 수 있습니다.
+
+<img src="docs/screenshots/admin-phone.jpg" alt="휴대폰 화면" width="260">
+
+## 무엇을 하나요
+
+- 10분마다 지금 시간대와 날씨를 확인합니다.
+- 시간대나 날씨가 바뀌거나 정해 둔 간격(기본 3시간)이 지나면 어울리는 이미지로 바꿉니다.
+- 이미지에 날씨, 기온, 작품명을 작게 넣습니다.
+- 글자가 놓일 자리의 밝기를 재서, 밝으면 검은 글자로 바꿉니다.
+- TV 크기를 모델명에서 읽어, 어떤 인치에서도 글자가 같은 실제 크기로 보이게 합니다.
+- 명화는 자르지 않고 어두운 벽에 건 모습으로 보여 줍니다.
+- 테마를 골라 원하는 이미지만 나오게 하고, 내 폴더나 인터넷의 이미지를 직접 추가할 수 있습니다.
+- TV를 시청 중이면 화면을 건드리지 않고, TV가 꺼져 있으면 깨우지 않습니다.
+
+## 준비물
+
+- 아트모드를 지원하는 삼성 더 프레임 TV ([지원 범위](#지원하는-tv) 참고)
 - TV와 같은 네트워크에 있는 Linux 서버
 - Python 3.10 이상, `systemd`, Noto Sans CJK 글꼴 (`fonts-noto-cjk`)
 
@@ -158,6 +286,38 @@ ssh -N -L 8765:127.0.0.1:8765 사용자@서버주소
 - 이 프로그램이 올린 이미지만 지웁니다. 직접 올린 사진과 기본 작품은 지우지 않습니다.
 - 기본값은 꺼짐입니다.
 
+## 지원하는 TV
+
+아트모드가 있는 더 프레임 TV라면 연식과 상관없이 동작하도록 만들었습니다. 다만 직접 시험한 기종은 하나뿐입니다.
+
+| 기종 | Art API | 상태 |
+|---|---|---|
+| 2021년형 LS03A | 2.03 | 직접 시험: 업로드, 작품 변경, 삭제, 자동 교체 |
+| 2024년형 LS03F | 5.0.0.0 | 미시험. 라이브러리 이슈 [#166](https://github.com/xchwarze/samsung-tv-ws-api/issues/166)에 업로드 사례가 있습니다 |
+| 2025년형 LS03F | 미확인 | 미시험. 라이브러리 이슈 [#185](https://github.com/xchwarze/samsung-tv-ws-api/issues/185)에 사용 사례가 있습니다 |
+| 구형 | 0.97 | 미시험. 라이브러리에 전용 업로드 경로가 있습니다 |
+| 일반 삼성 TV | 없음 | 불가. 아트모드 기능이 없습니다 |
+
+TV마다 다른 부분은 자동으로 맞춥니다.
+
+| 항목 | 동작 |
+|---|---|
+| TV 인식 | 더 프레임이 아니면 TV에 아무것도 보내지 않고 안내합니다 |
+| 해상도 | TV의 해상도가 4K보다 낮으면 그 크기로 만들어 보냅니다 |
+| 글자 크기 | 모델명에서 인치를 읽어 맞춥니다. 작은 TV는 1.8배까지만 키웁니다 |
+| 사진 목록 | 분류 ID가 다른 기종이면 전체 목록에서 찾습니다 |
+| 업로드 | 저장은 됐는데 완료 응답이 없으면 목록을 다시 읽어 찾아냅니다 |
+| 작품 변경 | 표시를 확인하지 못하면 이전 이미지를 지우지 않습니다 |
+| 삭제 | 응답 대신 TV에 실제로 남은 이미지로 판단합니다. 실패하면 자동으로 끕니다 |
+
+관리 페이지 `TV` 탭의 `이 TV에서 되는 기능`에서 기능마다 `됨`, `안 됨`, `확인 못 함`, `아직 시험 전`을 볼 수 있습니다. `기록 지우고 다시 시험`을 누르면 꺼졌던 기능을 다시 시도합니다.
+
+다른 TV를 쓰신다면 결과를 알려 주세요. 아래 명령의 출력을 [TV 호환성 보고](https://github.com/dicebattle/TheFrameVanced/issues/new?template=tv-report.md)로 보내 주시면 표에 추가합니다. TV 주소는 출력되지 않습니다.
+
+```bash
+~/TheFrameVanced/.venv/bin/python -W ignore ~/TheFrameVanced/current/frame.py --data ~/TheFrameVanced/data --report
+```
+
 ## 테마 고르기
 
 `이미지` 탭에서 테마를 누르면 바로 저장되고, 다음 교체부터 켜 둔 테마의 이미지만 나옵니다. 이미지 하나만 빼고 싶으면 이미지 아래의 `액자에 사용`을 끄세요.
@@ -216,7 +376,8 @@ ssh -N -L 8765:127.0.0.1:8765 사용자@서버주소
 공개 소스에서 새 후보를 찾으려면 수집 도구를 쓰세요. 번호를 붙인 썸네일 모음과 `candidates.json`을 만들어 주니, 직접 보고 고른 항목을 목록에 추가하면 됩니다.
 
 ```bash
-.venv/bin/python tools/collect_candidates.py candidates commons skylines nasa nga cleveland met
+cd ~/TheFrameVanced
+.venv/bin/python current/tools/collect_candidates.py candidates commons skylines nasa nga cleveland met
 ```
 
 - [The Metropolitan Museum of Art](https://metmuseum.github.io/) 수집도 지원하지만, 시험 때 요청이 403으로 막혀 기본 목록에는 넣지 않았습니다.
@@ -260,10 +421,12 @@ README 스크린샷에 쓴 이미지입니다.
 - `set_artmode()`는 이 TV에서 응답 없이 멈출 수 있어 사용하지 않습니다. 그래서 프로그램이 아트모드를 켜지는 않습니다.
 - 라이브러리 CLI를 쓸 때는 `--no-print-token`을 붙이세요. 없으면 시작할 때 리모컨 채널의 허용을 기다리다 실패합니다.
 - 글자가 사진과 겹쳐 잘 보이지 않으면 `글자` 탭의 `글자 뒤 어둡게`를 높이거나 위치를 옮기세요.
-- 다른 연식의 TV에서는 시험하지 않았습니다.
+- 2021년형 LS03A 외의 TV에서는 아직 시험하지 않았습니다. 다른 기종 대응은 가짜 TV 테스트로만 확인했습니다.
+- 세로로 설치한 TV는 고려하지 않았습니다.
 
 ## 테스트
 
 ```bash
-.venv/bin/python -m unittest discover tests
+cd ~/TheFrameVanced/current
+../.venv/bin/python -m unittest discover tests
 ```

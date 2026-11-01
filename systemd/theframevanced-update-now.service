@@ -1,0 +1,8 @@
+[Unit]
+Description=TheFrameVanced update started from the admin page
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=%h/TheFrameVanced/.venv/bin/python %h/TheFrameVanced/current/updater.py --install
+TimeoutStartSec=900
