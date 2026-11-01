@@ -1,10 +1,15 @@
 import sys
 import tempfile
 import unittest
+from datetime import datetime, timedelta
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import frame  # noqa: E402
+
+
+KST = ZoneInfo("Asia/Seoul")
 
 
 class FakeArt:
@@ -147,6 +152,73 @@ class UpdateTv(unittest.TestCase):
         self.assertEqual(frame.my_images(art), {"MY_F0001"})
         self.run_update(art)
         self.assertEqual(art.deleted, ["MY_F0001"])
+
+
+class Clock(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.image = Path(self.tmp.name) / "a.jpg"
+        self.image.write_bytes(b"jpeg")
+
+    def test_next_time_is_on_the_five_minute_grid(self):
+        base = datetime(2026, 11, 2, 14, 4, 30, tzinfo=KST)
+        cases = {(14, 4, 30): (14, 5), (14, 5, 0): (14, 5), (14, 5, 1): (14, 10), (14, 59, 30): (15, 0)}
+        for (h, m, s), expected in cases.items():
+            found = frame.next_clock_time(base.replace(hour=h, minute=m, second=s), 5)
+            self.assertEqual((found.hour, found.minute, found.second), (*expected, 0))
+
+    def test_outside_art_mode_nothing_is_uploaded_for_the_clock(self):
+        art = FakeArt(mode="off")
+        state = {"uploaded": ["MY_F0001"]}
+        result = frame.update_tv(art, self.image, state, True, {}, art_mode_only=True)
+        self.assertIsNone(result)
+        self.assertEqual(art.photos, ["MY_F0001"])
+        self.assertEqual(art.deleted, [])
+
+    def test_image_changes_only_when_the_time_comes(self):
+        art = FakeArt()
+        moment = datetime.now(KST) + timedelta(seconds=0.4)
+        seen = {}
+        original = art.select_image
+
+        def select(content_id, show=True):
+            seen["at"] = datetime.now(KST)
+            original(content_id, show)
+
+        art.select_image = select
+        frame.update_tv(art, self.image, {"uploaded": []}, False, {}, show_at=moment)
+        self.assertGreaterEqual(seen["at"], moment)
+
+    def test_a_new_connection_is_used_to_change_the_image(self):
+        first, second = FakeArt(), FakeArt()
+        second.photos = first.photos
+        reopened = []
+
+        def reopen():
+            reopened.append(True)
+            return second
+
+        moment = datetime.now(KST) + timedelta(seconds=0.1)
+        state = {"uploaded": ["MY_F0001"]}
+        new_id = frame.update_tv(first, self.image, state, True, {}, show_at=moment, reopen=reopen)
+        self.assertEqual(reopened, [True])
+        self.assertEqual(first.selected, [])
+        self.assertEqual(second.selected, [(new_id, True)])
+        self.assertEqual(second.deleted, ["MY_F0001"])
+
+    def test_old_clock_images_are_all_removed_after_a_successful_change(self):
+        art = FakeArt(photos=[f"MY_F{n:04}" for n in range(1, 42)])
+        state = {"uploaded": list(art.photos)}
+        new_id = frame.update_tv(art, self.image, state, True, {})
+        self.assertEqual(len(art.deleted), 41)
+        self.assertEqual(state["uploaded"], [new_id])
+
+    def test_time_can_go_in_the_caption(self):
+        cfg = {"location_label": "서울"}
+        ctx = {"term": "입동", "weather_label": "맑음", "temperature": 3, "time": "14:35"}
+        layout = {"headline": "{time} · {weather} {temp}°", "caption": "{title}"}
+        self.assertEqual(frame.caption_lines({"caption": "그림"}, ctx, cfg, layout)[0], "14:35 · 맑음 3°")
 
 
 class CheckTv(unittest.TestCase):

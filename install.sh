@@ -23,6 +23,7 @@ done
 systemctl --user daemon-reload
 systemctl --user enable --now theframevanced-admin.service theframevanced-update.timer
 systemctl --user restart theframevanced-admin.service
+systemctl --user try-restart theframevanced.timer
 
 echo "Installed v$VERSION in $ROOT"
 echo "Open the admin page at http://127.0.0.1:8765"

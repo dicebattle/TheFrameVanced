@@ -130,6 +130,7 @@ def install_units(root, code_dir):
 def restart_services():
     subprocess.run(["systemctl", "--user", "daemon-reload"], check=False, timeout=30)
     subprocess.run(["systemctl", "--user", "restart", "theframevanced-admin.service"], check=False, timeout=60)
+    subprocess.run(["systemctl", "--user", "try-restart", "theframevanced.timer"], check=False, timeout=30)
 
 
 def admin_answers(seconds=HEALTH_SECONDS):

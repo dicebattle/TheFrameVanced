@@ -97,7 +97,7 @@ def save_config():
         cfg = read_json("config.json", {})
         layout = body.pop("layout", None)
         allowed = {
-            "tv_host", "tv_inches", "change_minutes", "min_weather_change_minutes", "disabled_themes", "auto_update",
+            "tv_host", "tv_inches", "change_minutes", "min_weather_change_minutes", "disabled_themes", "auto_update", "clock_minutes",
         }
         if body.get("tv_host") not in (None, cfg.get("tv_host")):
             # A different TV may have a different size: read it again from its model name.
