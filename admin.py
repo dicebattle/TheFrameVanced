@@ -10,6 +10,7 @@ import socket
 import subprocess
 import sys
 import threading
+import time
 import urllib.parse
 import urllib.request
 from datetime import datetime
@@ -28,6 +29,7 @@ SERVICE = "theframevanced"
 ALLOWED_HOSTS = {"127.0.0.1", "localhost", *filter(None, os.environ.get("ADMIN_HOSTS", "").split(","))}
 PREVIEW_SIZE = (1280, 720)
 THUMB_SIZE = (360, 203)
+WATCH_SECONDS = 15
 USER_AGENT = {"User-Agent": "TheFrameVanced/0.1"}
 
 app = Flask(__name__, static_folder=None)
@@ -390,13 +392,34 @@ def log():
     return jsonify(lines=run.stdout.splitlines()[-40:])
 
 
+def watch_art_mode():
+    """Refresh the picture as soon as the TV comes back to Art Mode."""
+    before = "first reading"
+    while True:
+        time.sleep(WATCH_SECONDS)
+        try:
+            art_on = frame.read_art_mode(read_json("config.json", {}))
+            came_back = frame.returned_to_art_mode(before, art_on)
+            before = art_on
+            if came_back and systemctl("is-enabled", f"{SERVICE}.timer").stdout.strip() == "enabled":
+                print("TV returned to Art Mode", flush=True)
+                cmd = [sys.executable, "-W", "ignore", str(HERE / "frame.py"), "--data", str(data_dir), "--returned"]
+                run = subprocess.run(cmd, capture_output=True, text=True, timeout=170)
+                print((run.stdout + run.stderr)[-400:], flush=True)
+        except Exception as e:  # Watching must survive a bad moment on the network.
+            print(f"art mode watch: {type(e).__name__}: {str(e)[:120]}", flush=True)
+
+
 def main():
     global data_dir
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--data", type=Path, required=True)
     parser.add_argument("--port", type=int, default=8765)
+    parser.add_argument("--no-watch", action="store_true", help="do not follow the TV's Art Mode")
     args = parser.parse_args()
     data_dir = args.data.resolve()
+    if not args.no_watch:
+        threading.Thread(target=watch_art_mode, daemon=True).start()
     app.run(host="127.0.0.1", port=args.port, threaded=True)
 
 
