@@ -909,31 +909,6 @@
   ]
  },
  {
-  "id": "gwangan-night",
-  "kind": "photo",
-  "caption": "부산 광안대교의 밤",
-  "times": [
-   "sunset",
-   "night"
-  ],
-  "seasons": [
-   "any"
-  ],
-  "weather": [
-   "clear",
-   "cloud"
-  ],
-  "url": "https://upload.wikimedia.org/wikipedia/commons/0/0e/Gwangan_Bridge_and_Gwangalli_Beach_-_Gwangalli2721.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
-  "source": "File:Gwangan Bridge and Gwangalli Beach - Gwangalli2721.jpg",
-  "license": "CC0",
-  "artist": "lumoplank",
-  "provider": "Wikimedia Commons",
-  "themes": [
-   "한국",
-   "야경"
-  ]
- },
- {
   "id": "starry-rhone",
   "kind": "painting",
   "caption": "론강의 별이 빛나는 밤, 빈센트 반 고흐",
@@ -1458,30 +1433,6 @@
   "themes": [
    "한국",
    "자연 풍경"
-  ]
- },
- {
-  "id": "yeouido-night",
-  "kind": "photo",
-  "caption": "서울 여의도의 밤",
-  "times": [
-   "night"
-  ],
-  "seasons": [
-   "any"
-  ],
-  "weather": [
-   "cloud",
-   "rain"
-  ],
-  "url": "https://upload.wikimedia.org/wikipedia/commons/9/9a/Yeouido_Night_View_2010.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
-  "source": "File:Yeouido Night View 2010.jpg",
-  "license": "CC BY 2.0",
-  "artist": "Bryan Dorrough",
-  "provider": "Wikimedia Commons",
-  "themes": [
-   "한국",
-   "야경"
   ]
  },
  {
@@ -2010,30 +1961,6 @@
   ]
  },
  {
-  "id": "hongkong-skyline",
-  "kind": "photo",
-  "caption": "홍콩 스카이라인의 밤",
-  "times": [
-   "night"
-  ],
-  "seasons": [
-   "any"
-  ],
-  "weather": [
-   "clear",
-   "cloud"
-  ],
-  "url": "https://upload.wikimedia.org/wikipedia/commons/e/e2/Hong_Kong_night_skyline_%28central%29_2013-11-25.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
-  "source": "Hong Kong night skyline (central) 2013-11-25.jpg",
-  "provider": "Wikimedia Commons",
-  "license": "CC BY-SA 3.0",
-  "artist": "Lawrence W.K. Ho",
-  "themes": [
-   "세계 도시",
-   "야경"
-  ]
- },
- {
   "id": "tokyo-tower",
   "kind": "photo",
   "caption": "도쿄 타워와 도심의 밤",
@@ -2052,30 +1979,6 @@
   "provider": "Wikimedia Commons",
   "license": "CC BY 4.0",
   "artist": "David Kernan",
-  "themes": [
-   "세계 도시",
-   "야경"
-  ]
- },
- {
-  "id": "tokyo-night",
-  "kind": "photo",
-  "caption": "도쿄의 밤",
-  "times": [
-   "night"
-  ],
-  "seasons": [
-   "any"
-  ],
-  "weather": [
-   "clear",
-   "cloud"
-  ],
-  "url": "https://upload.wikimedia.org/wikipedia/commons/d/d4/Tokyo_by_night_2011.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
-  "source": "Tokyo by night 2011.jpg",
-  "provider": "Wikimedia Commons",
-  "license": "CC BY-SA 3.0",
-  "artist": "Nalilord",
   "themes": [
    "세계 도시",
    "야경"
@@ -2347,31 +2250,6 @@
   ]
  },
  {
-  "id": "chicago-dusk",
-  "kind": "photo",
-  "caption": "시카고의 푸른 밤",
-  "times": [
-   "sunset",
-   "night"
-  ],
-  "seasons": [
-   "any"
-  ],
-  "weather": [
-   "clear",
-   "cloud"
-  ],
-  "url": "https://upload.wikimedia.org/wikipedia/commons/1/17/Chicago_skyline_at_night_from_360_Chicago_observation_deck_%2849713689342%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
-  "source": "Chicago skyline at night from 360 Chicago observation deck (49713689342).jpg",
-  "provider": "Wikimedia Commons",
-  "license": "CC BY-SA 2.0",
-  "artist": "Matt Kieffer from London, United Kingdom",
-  "themes": [
-   "세계 도시",
-   "야경"
-  ]
- },
- {
   "id": "dubai-marina",
   "kind": "photo",
   "caption": "두바이 마리나의 밤",
@@ -2414,30 +2292,6 @@
   "provider": "Wikimedia Commons",
   "license": "CC BY 2.0",
   "artist": "Luke Price from Rotterdam, Netherlands",
-  "themes": [
-   "세계 도시",
-   "야경"
-  ]
- },
- {
-  "id": "san-francisco-night",
-  "kind": "photo",
-  "caption": "샌프란시스코의 밤",
-  "times": [
-   "night"
-  ],
-  "seasons": [
-   "any"
-  ],
-  "weather": [
-   "clear",
-   "cloud"
-  ],
-  "url": "https://upload.wikimedia.org/wikipedia/commons/b/b3/San_Francisco_Skyline_at_night.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
-  "source": "San Francisco Skyline at night.jpg",
-  "provider": "Wikimedia Commons",
-  "license": "CC BY-SA 4.0",
-  "artist": "Cgbriggs19",
   "themes": [
    "세계 도시",
    "야경"
@@ -2561,6 +2415,298 @@
    "한국",
    "야경",
    "항공 사진"
+  ]
+ },
+ {
+  "id": "seoul-from-namsan",
+  "kind": "photo",
+  "caption": "N서울타워에서 본 서울",
+  "times": [
+   "sunset",
+   "night"
+  ],
+  "seasons": [
+   "any"
+  ],
+  "weather": [
+   "clear",
+   "cloud"
+  ],
+  "url": "https://upload.wikimedia.org/wikipedia/commons/3/3a/N_Seoul_Tower_view_2.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+  "source": "N Seoul Tower view 2.jpg",
+  "provider": "Wikimedia Commons",
+  "license": "CC BY-SA 4.0",
+  "artist": "kallerna",
+  "themes": [
+   "한국",
+   "야경"
+  ]
+ },
+ {
+  "id": "lotte-world-night",
+  "kind": "photo",
+  "caption": "서울 잠실 롯데월드의 밤",
+  "times": [
+   "night"
+  ],
+  "seasons": [
+   "any"
+  ],
+  "weather": [
+   "clear",
+   "cloud"
+  ],
+  "url": "https://upload.wikimedia.org/wikipedia/commons/6/67/Lotte_World_night_view_2.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+  "source": "Lotte World night view 2.jpg",
+  "provider": "Wikimedia Commons",
+  "license": "CC BY-SA 4.0",
+  "artist": "kallerna",
+  "themes": [
+   "한국",
+   "야경"
+  ]
+ },
+ {
+  "id": "gwangjin-night",
+  "kind": "photo",
+  "caption": "서울 광진구의 저녁 불빛",
+  "times": [
+   "sunset",
+   "night"
+  ],
+  "seasons": [
+   "any"
+  ],
+  "weather": [
+   "clear",
+   "cloud"
+  ],
+  "url": "https://upload.wikimedia.org/wikipedia/commons/3/33/Seoul_City_Gwangjin_District_Night_View_20250213_%2801%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+  "source": "Seoul City Gwangjin District Night View 20250213 (01).jpg",
+  "provider": "Wikimedia Commons",
+  "license": "KOGL Type 1",
+  "artist": "서울관광재단",
+  "themes": [
+   "한국",
+   "야경"
+  ]
+ },
+ {
+  "id": "ansan-night",
+  "kind": "photo",
+  "caption": "서울 안산에서 본 밤",
+  "times": [
+   "night"
+  ],
+  "seasons": [
+   "any"
+  ],
+  "weather": [
+   "clear",
+   "cloud"
+  ],
+  "url": "https://upload.wikimedia.org/wikipedia/commons/0/05/1_ansan_mountain_night_2018.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+  "source": "1 ansan mountain night 2018.jpg",
+  "provider": "Wikimedia Commons",
+  "license": "CC BY-SA 4.0",
+  "artist": "Chensiyuan",
+  "themes": [
+   "한국",
+   "야경"
+  ]
+ },
+ {
+  "id": "busan-port-bridge",
+  "kind": "photo",
+  "caption": "부산항대교의 밤",
+  "times": [
+   "night"
+  ],
+  "seasons": [
+   "any"
+  ],
+  "weather": [
+   "clear",
+   "cloud"
+  ],
+  "url": "https://upload.wikimedia.org/wikipedia/commons/2/2a/Busan_Port_Bridge_Night_View_20170830.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+  "source": "Busan Port Bridge Night View 20170830.jpg",
+  "provider": "Wikimedia Commons",
+  "license": "CC BY 4.0",
+  "artist": "채지형",
+  "themes": [
+   "한국",
+   "야경"
+  ]
+ },
+ {
+  "id": "dangsan-bridge",
+  "kind": "photo",
+  "caption": "서울 당산철교의 밤",
+  "times": [
+   "night"
+  ],
+  "seasons": [
+   "any"
+  ],
+  "weather": [
+   "clear",
+   "cloud"
+  ],
+  "url": "https://upload.wikimedia.org/wikipedia/commons/9/99/Dangsan_Railway_Bridge_Night_View.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+  "source": "Dangsan Railway Bridge Night View.jpg",
+  "provider": "Wikimedia Commons",
+  "license": "CC BY 2.0",
+  "artist": "Tony",
+  "themes": [
+   "한국",
+   "야경"
+  ]
+ },
+ {
+  "id": "pudong-panorama",
+  "kind": "photo",
+  "caption": "상하이 푸둥의 밤",
+  "times": [
+   "night"
+  ],
+  "seasons": [
+   "any"
+  ],
+  "weather": [
+   "clear",
+   "cloud"
+  ],
+  "url": "https://upload.wikimedia.org/wikipedia/commons/3/32/Pudong_Shanghai_November_2017_HDR_panorama.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+  "source": "Pudong Shanghai November 2017 HDR panorama.jpg",
+  "provider": "Wikimedia Commons",
+  "license": "CC BY-SA 4.0",
+  "artist": "King of Hearts",
+  "themes": [
+   "세계 도시",
+   "야경"
+  ]
+ },
+ {
+  "id": "hongkong-peak",
+  "kind": "photo",
+  "caption": "빅토리아 피크에서 본 홍콩",
+  "times": [
+   "night"
+  ],
+  "seasons": [
+   "any"
+  ],
+  "weather": [
+   "clear",
+   "cloud"
+  ],
+  "url": "https://upload.wikimedia.org/wikipedia/commons/a/a4/Hong_Kong_Harbour_Night_2019-06-11.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+  "source": "Hong Kong Harbour Night 2019-06-11.jpg",
+  "provider": "Wikimedia Commons",
+  "license": "CC BY-SA 4.0",
+  "artist": "Benh LIEU SONG (Flickr)",
+  "themes": [
+   "세계 도시",
+   "야경"
+  ]
+ },
+ {
+  "id": "kl-petronas",
+  "kind": "photo",
+  "caption": "쿠알라룸푸르 페트로나스 타워",
+  "times": [
+   "sunset"
+  ],
+  "seasons": [
+   "any"
+  ],
+  "weather": [
+   "clear",
+   "cloud"
+  ],
+  "url": "https://upload.wikimedia.org/wikipedia/commons/c/c8/The_Twins_SE_Asia_2019_%2849171985716%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+  "source": "The Twins SE Asia 2019 (49171985716).jpg",
+  "provider": "Wikimedia Commons",
+  "license": "CC BY 2.0",
+  "artist": "James Kerwin from Tbilisi",
+  "themes": [
+   "세계 도시",
+   "야경"
+  ]
+ },
+ {
+  "id": "more-london",
+  "kind": "photo",
+  "caption": "런던 모어 런던의 저녁",
+  "times": [
+   "sunset",
+   "night"
+  ],
+  "seasons": [
+   "any"
+  ],
+  "weather": [
+   "clear",
+   "cloud"
+  ],
+  "url": "https://upload.wikimedia.org/wikipedia/commons/8/87/More_London_Office_Development_at_Dusk%2C_London%2C_UK_-_Diliff.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+  "source": "More London Office Development at Dusk, London, UK - Diliff.jpg",
+  "provider": "Wikimedia Commons",
+  "license": "CC BY-SA 3.0",
+  "artist": "Diliff",
+  "themes": [
+   "세계 도시",
+   "야경"
+  ]
+ },
+ {
+  "id": "empire-state-dusk",
+  "kind": "photo",
+  "caption": "뉴욕 엠파이어 스테이트 빌딩의 저녁",
+  "times": [
+   "sunset"
+  ],
+  "seasons": [
+   "any"
+  ],
+  "weather": [
+   "clear",
+   "cloud"
+  ],
+  "url": "https://upload.wikimedia.org/wikipedia/commons/0/05/View_of_Empire_State_Building_from_Rockefeller_Center_New_York_City_dllu.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+  "source": "View of Empire State Building from Rockefeller Center New York City dllu.jpg",
+  "provider": "Wikimedia Commons",
+  "license": "CC BY-SA 4.0",
+  "artist": "Dllu",
+  "themes": [
+   "세계 도시",
+   "야경"
+  ]
+ },
+ {
+  "id": "frankfurt-river",
+  "kind": "photo",
+  "caption": "프랑크푸르트 강변의 저녁",
+  "times": [
+   "sunset",
+   "night"
+  ],
+  "seasons": [
+   "any"
+  ],
+  "weather": [
+   "clear",
+   "cloud"
+  ],
+  "url": "https://upload.wikimedia.org/wikipedia/commons/9/90/Frankfurt_Skyline_at_night_%28Unsplash%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+  "source": "Frankfurt Skyline at night (Unsplash).jpg",
+  "provider": "Wikimedia Commons",
+  "license": "CC0",
+  "artist": "Mathias Konrath konni",
+  "themes": [
+   "세계 도시",
+   "야경"
   ]
  }
 ]

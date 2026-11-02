@@ -31,6 +31,7 @@ PREVIEW_SIZE = (1280, 720)
 THUMB_SIZE = (360, 203)
 WATCH_SECONDS = 15
 USER_AGENT = {"User-Agent": "TheFrameVanced/0.1"}
+BASE_JOB = "base images"
 
 app = Flask(__name__, static_folder=None)
 data_dir = None
@@ -203,19 +204,48 @@ def update_item(item_id):
     abort(404)
 
 
-def start_sync(source):
-    status = source_status[source["id"]] = {"running": True, "added": 0, "failed": 0, "error": None}
+def start_job(key, work):
+    status = source_status[key] = {"running": True, "added": 0, "failed": 0, "error": None}
 
     def run():
         try:
-            status["added"], status["failed"] = sources.sync(
-                data_dir, source, write_lock, on_progress=lambda n: status.update(added=n)
-            )
+            status["added"], status["failed"] = work(lambda n: status.update(added=n))
         except Exception as e:
             status["error"] = str(e)[:200]
         status["running"] = False
 
     threading.Thread(target=run, daemon=True).start()
+
+
+def start_sync(source):
+    start_job(source["id"], lambda progress: sources.sync(data_dir, source, write_lock, on_progress=progress))
+
+
+@app.get("/api/packs")
+def list_packs():
+    installed = {s["id"] for s in sources.load_sources(data_dir)}
+    rows = [{
+        "id": p["id"], "name": p["name"], "note": p["note"], "personal": p.get("personal", False),
+        "images": len(p.get("images", [])), "installed": p["id"] in installed,
+    } for p in sources.load_packs()]
+    return jsonify(base={**sources.base_status(data_dir), "status": source_status.get(BASE_JOB)}, packs=rows)
+
+
+@app.post("/api/packs/<pack_id>/install")
+def install_pack(pack_id):
+    try:
+        with write_lock:
+            source = sources.add_pack(data_dir, pack_id)
+    except ValueError as e:
+        return jsonify(ok=False, error=str(e)), 404
+    start_sync(source)
+    return jsonify(ok=True)
+
+
+@app.post("/api/base/sync")
+def sync_base():
+    start_job(BASE_JOB, lambda progress: sources.sync_base(data_dir, write_lock, on_progress=progress))
+    return jsonify(ok=True)
 
 
 @app.get("/api/sources")

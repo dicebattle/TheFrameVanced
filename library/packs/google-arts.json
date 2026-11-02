@@ -1,0 +1,13 @@
+{
+ "id": "google-arts",
+ "name": "Google Arts & Culture 명화",
+ "theme": "Google 명화",
+ "personal": true,
+ "note": "Google Arts & Culture 새 탭 목록의 명화 약 350장을 받습니다. 권리는 소장 기관마다 달라 개인 감상용으로만 쓰세요.",
+ "feed": "google-arts",
+ "defaults": {
+  "kind": "painting",
+  "fit": "mat",
+  "license": "개인 감상 용도"
+ }
+}
