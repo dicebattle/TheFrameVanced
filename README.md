@@ -89,7 +89,7 @@ git clone https://github.com/dicebattle/TheFrameVanced.git /tmp/TheFrameVanced
 | `data/` | 설정, 이미지, 실행 기록. 업데이트해도 그대로입니다 |
 | `.venv/` | Python 환경 |
 
-이미지를 내려받습니다. 소스별 요청 제한을 지키느라 시간이 걸릴 수 있습니다. 다시 실행하면 이어서 받습니다.
+이미지를 내려받습니다. 소스별 요청 제한을 지키느라 시간이 걸릴 수 있습니다. 다시 실행하면 이어서 받습니다. 관리 페이지 `이미지` 탭의 `기본 이미지 맞추기`를 눌러도 같습니다.
 
 ```bash
 cd ~/TheFrameVanced
@@ -283,13 +283,30 @@ TV마다 다른 부분은 자동으로 맞춥니다.
 
 인터넷의 목록은 믿을 수 없는 데이터로 취급합니다. 알려진 항목만 읽고, 파일 이름은 프로그램이 정하며, 실제 이미지로 읽히는 파일만 저장합니다. 저작권을 확인한 이미지만 추가하세요.
 
+## 이미지 묶음
+
+`이미지` 탭의 `이미지 묶음`에서 `내려받기`를 누르면 그 서버로 이미지를 받습니다. 저장소와 릴리즈에는 이미지가 없고, 주소와 출처만 `library/packs/`에 있습니다. 누르기 전에는 아무것도 받지 않습니다. 빼고 싶으면 `소스 빼기`를 누르세요.
+
+| 묶음 | 내용 | 장수 | 조건 |
+|---|---|---:|---|
+| 스톡 사이트 야경 | [Unsplash](https://unsplash.com/license)와 [Pexels](https://www.pexels.com/license/)에서 고른 야경 | 23 | 사이트 약관을 따릅니다 |
+| 공유마당 한국 야경 | [공유마당](https://gongu.copyright.or.kr/)의 서울·부산 야경 | 10 | CC BY, 작가 표시 필요 |
+| Bing 오늘의 배경 · 개인용 | 최근 8일의 Bing 배경. `다시 가져오기`로 새 이미지를 받습니다 | 최대 8 | 저작권은 Microsoft와 사진가에게 있습니다. 개인 배경화면으로만 쓰세요 |
+| Google Arts & Culture 명화 · 개인용 | Google Arts & Culture 새 탭 목록 | 약 350 | 권리는 소장 기관마다 다릅니다. 개인 감상용으로만 쓰세요 |
+
+개인용 묶음은 저작권이 풀린 이미지가 아닙니다. 프로그램에는 사이트의 공개 목록 주소만 있고, 이미지를 누가 다시 배포하면 안 됩니다.
+
+[Pixabay](https://pixabay.com/service/license-summary/)는 키 없이 받을 수 있는 크기가 1280px까지라 넣지 않았습니다.
+
+FHD(1920×1080)보다 작은 이미지는 어떤 소스에서든 받지 않습니다. 세로 이미지는 1080×1920 이상이면 됩니다.
+
 ## 기본 이미지
 
-저장소에는 이미지 파일이 없고, 출처 목록 `library/manifest.json`만 있습니다. 항목마다 원본 주소, 제공처, 작가, 라이선스가 들어 있고, `tools/build_library.py`가 이 목록대로 내려받습니다. 기본 목록은 108장입니다.
+저장소에는 이미지 파일이 없고, 출처 목록 `library/manifest.json`만 있습니다. 항목마다 원본 주소, 제공처, 작가, 라이선스가 들어 있고, `tools/build_library.py`가 이 목록대로 내려받습니다. 기본 목록은 114장입니다. 새 버전에서 목록이 바뀌면 `이미지` 탭의 `기본 이미지 맞추기`를 누르세요. 새 이미지를 받고, 목록에서 빠진 이미지는 액자에 더 나오지 않습니다. 빠진 이미지의 파일은 지우지 않습니다.
 
 | 소스 | 내용 | 장수 | 라이선스 |
 |---|---|---:|---|
-| [Wikimedia Commons](https://commons.wikimedia.org/) | 풍경, 도시 주·야경, 항공 사진, 명화 | 73 | 사진마다 다름 |
+| [Wikimedia Commons](https://commons.wikimedia.org/) | 풍경, 도시 주·야경, 항공 사진, 명화 | 79 | 사진마다 다름 |
 | [National Gallery of Art](https://www.nga.gov/open-access-images.html) | 명화 | 18 | CC0 |
 | [NASA Image and Video Library](https://images.nasa.gov/) | 우주에서 본 도시와 오로라 | 11 | 공개 도메인 |
 | [Cleveland Museum of Art](https://www.clevelandart.org/open-access) | 명화 | 6 | CC0 |
@@ -312,6 +329,7 @@ cd ~/TheFrameVanced
 | [OpenStreetMap Nominatim](https://nominatim.org/) | 입력한 지역 이름 | `찾기`를 누를 때만 |
 | 기본 이미지 소스 | 이미지 요청 | 이미지를 내려받을 때 |
 | 직접 추가한 주소 | 이미지 요청 | `가져오기`를 누를 때만 |
+| 이미지 묶음의 사이트 | 목록과 이미지 요청 | `내려받기`나 `다시 가져오기`를 누를 때만 |
 
 ## 크레딧
 

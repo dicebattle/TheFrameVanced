@@ -130,6 +130,7 @@ dl.facts dd { margin: 0; font-family: var(--mono); font-size: 12.5px; word-break
 .source-row small { display: block; color: var(--ink-soft); word-break: break-all; }
 .source-row .row-actions { display: flex; gap: 12px; margin-top: 3px; }
 .source-row button { background: none; border: 0; padding: 2px 0; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; font-size: 12.5px; }
+.source-row button:disabled { color: var(--ink-soft); text-decoration: none; cursor: default; }
 .gallery { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .tile { position: relative; background: none; border: 0; padding: 0; text-align: left; cursor: pointer; }
 .tile img { display: block; width: 100%; aspect-ratio: 16/9; object-fit: cover; background: #e5e5df; }
@@ -212,6 +213,10 @@ dl.facts dd { margin: 0; font-family: var(--mono); font-size: 12.5px; word-break
       <p class="hint">켜 둔 테마의 이미지만 액자에 나옵니다. 누르면 바로 저장됩니다.</p>
       <div class="theme-list" id="themes"></div>
       <div class="notice" id="themeNotice" aria-live="polite"></div>
+      <h2>이미지 묶음</h2>
+      <p class="hint">누르면 이 서버로 내려받습니다. 프로그램에는 이미지가 들어 있지 않습니다. FHD(1920×1080)보다 작은 이미지는 받지 않습니다.</p>
+      <div id="packList"></div>
+      <div class="notice" id="packNotice" aria-live="polite"></div>
       <h2>이미지 소스 추가</h2>
       <p class="hint">내 폴더나 인터넷의 이미지를 창고로 가져옵니다. 저작권을 확인한 이미지만 추가하세요.</p>
       <form id="sourceForm">
@@ -485,8 +490,8 @@ function renderGallery() {
     wrap.append(b, use); host.append(wrap);
   }
 }
-const SOURCE_TYPES = { folder: "폴더", image: "이미지 주소", list: "목록 주소" };
-let sourcePoll;
+const SOURCE_TYPES = { folder: "폴더", image: "이미지 주소", list: "목록 주소", pack: "이미지 묶음" };
+let sourcePoll, packPoll;
 async function refreshCatalog() {
   const st = await api("/api/state");
   S.catalog = st.catalog; renderThemes(); renderGallery();
@@ -498,7 +503,7 @@ async function refreshSources() {
   for (const r of rows) {
     const row = document.createElement("div"); row.className = "source-row";
     const st = r.status;
-    const state = st?.error ? `가져오지 못했습니다: ${st.error}` : st?.running ? `가져오는 중 (${st.added}장)` : st?.failed ? `이미지 ${r.images}장, ${st.failed}장 실패` : `이미지 ${r.images}장`;
+    const state = st?.error ? `가져오지 못했습니다: ${st.error}` : st?.running ? `가져오는 중 (${st.added}장)` : st?.failed ? `이미지 ${r.images}장, ${st.failed}장 제외 (FHD 미만이거나 받지 못함)` : `이미지 ${r.images}장`;
     row.innerHTML = `<strong></strong><small></small><small></small><div class="row-actions"><button type="button">다시 가져오기</button><button type="button">소스 빼기</button></div>`;
     row.querySelector("strong").textContent = `${r.name} · ${r.theme}`;
     row.querySelectorAll("small")[0].textContent = `${SOURCE_TYPES[r.type]}: ${r.location}`;
@@ -508,7 +513,7 @@ async function refreshSources() {
     remove.addEventListener("click", async () => {
       if (!confirm(`${r.name} 소스와 창고에 복사된 이미지 ${r.images}장을 지웁니다. 원본 폴더나 사이트는 그대로 둡니다.`)) return;
       await api(`/api/sources/${encodeURIComponent(r.id)}/remove`, {}); notify("sourceNotice", "소스를 뺐습니다.", "ok");
-      refreshSources(); refreshCatalog();
+      refreshSources(); refreshPacks(); refreshCatalog();
     });
     host.append(row);
   }
@@ -516,6 +521,39 @@ async function refreshSources() {
   if (running) sourcePoll = setTimeout(refreshSources, 2000);
   else if (S.sourcesRunning) refreshCatalog();
   S.sourcesRunning = running;
+}
+function packRow(title, lines, label, disabled, onClick) {
+  const row = document.createElement("div"); row.className = "source-row";
+  row.innerHTML = `<strong></strong>${lines.map(() => "<small></small>").join("")}<div class="row-actions"><button type="button"></button></div>`;
+  row.querySelector("strong").textContent = title;
+  row.querySelectorAll("small").forEach((el, i) => { el.textContent = lines[i]; });
+  const button = row.querySelector("button");
+  button.textContent = label; button.disabled = disabled;
+  button.addEventListener("click", onClick);
+  return row;
+}
+async function refreshPacks() {
+  const { base, packs } = await api("/api/packs");
+  const host = $("packList"); host.innerHTML = "";
+  const st = base.status;
+  const baseState = st?.error ? `받지 못했습니다: ${st.error}`
+    : st?.running ? `받는 중 (${st.added}장)`
+    : base.new || base.retired ? `새 이미지 ${base.new}장, 빠지는 이미지 ${base.retired}장`
+    : st?.failed ? `${base.total}장, ${st.failed}장 제외 (FHD 미만이거나 받지 못함)` : `${base.total}장, 최신입니다`;
+  host.append(packRow("기본 이미지", [baseState], "기본 이미지 맞추기", st?.running || !(base.new || base.retired), async () => {
+    await api("/api/base/sync", {}); notify("packNotice", "기본 이미지를 맞추는 중입니다.", "ok"); refreshPacks();
+  }));
+  for (const p of packs) {
+    const size = p.images ? `${p.images}장` : "사이트 목록을 그때그때 읽습니다";
+    host.append(packRow(p.personal ? `${p.name} · 개인용` : p.name, [p.note, size], p.installed ? "받음" : "내려받기", p.installed, async () => {
+      await api(`/api/packs/${encodeURIComponent(p.id)}/install`, {}); notify("packNotice", `${p.name}을 내려받는 중입니다.`, "ok");
+      refreshPacks(); refreshSources();
+    }));
+  }
+  clearTimeout(packPoll);
+  if (st?.running) packPoll = setTimeout(refreshPacks, 2000);
+  else if (S.baseRunning) refreshCatalog();
+  S.baseRunning = st?.running;
 }
 function setupSources() {
   const hints = { folder: ["폴더 경로", "/mnt/nas/photos"], image: ["이미지 주소", "https://example.com/photo.jpg"], list: ["목록 주소", "https://example.com/images.json"] };
@@ -734,7 +772,7 @@ async function load() {
   $("timerToggle").checked = st.timer; $("cleanupToggle").checked = st.cleanup;
   $("clockToggle").checked = Boolean(st.config.clock_minutes);
   S.catalog = st.catalog; S.disabled = st.config.disabled_themes ?? [];
-  bindLayout(); syncChips(); renderThemes(); renderGallery(); refreshSources(); refreshUpdate(); drawPreview(); refreshTv();
+  bindLayout(); syncChips(); renderThemes(); renderGallery(); refreshSources(); refreshPacks(); refreshUpdate(); drawPreview(); refreshTv();
 }
 load().catch((e) => notify("textNotice", e.message, "err"));
 </script>

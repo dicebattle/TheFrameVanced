@@ -1,0 +1,13 @@
+{
+ "id": "bing",
+ "name": "Bing 오늘의 배경",
+ "theme": "Bing 배경",
+ "personal": true,
+ "note": "최근 8일의 Bing 배경을 받습니다. 저작권은 Microsoft와 사진가에게 있어 개인 배경화면으로만 쓰세요. 다시 가져오면 새 이미지만 받습니다.",
+ "feed": "bing",
+ "defaults": {
+  "kind": "photo",
+  "provider": "Bing",
+  "license": "개인 배경화면 용도"
+ }
+}

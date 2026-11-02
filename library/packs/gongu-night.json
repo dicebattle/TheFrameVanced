@@ -1,0 +1,128 @@
+{
+ "id": "gongu-night",
+ "name": "공유마당 한국 야경",
+ "theme": "공유마당 야경",
+ "note": "한국저작권위원회 공유마당의 CC BY 사진입니다. 작가 표시가 필요합니다.",
+ "defaults": {
+  "kind": "photo",
+  "seasons": [
+   "any"
+  ],
+  "weather": [
+   "clear",
+   "cloud"
+  ],
+  "themes": [
+   "한국",
+   "야경"
+  ],
+  "provider": "공유마당",
+  "license": "CC BY"
+ },
+ "images": [
+  {
+   "id": "gongu-11001765",
+   "url": "https://gongu.copyright.or.kr/gongu/wrt/cmmn/wrtFileDownload.do?wrtSn=11001765&fileSn=1",
+   "caption": "서울 성산대교의 저녁",
+   "times": [
+    "sunset",
+    "night"
+   ],
+   "artist": "김순식",
+   "source": "https://gongu.copyright.or.kr/gongu/wrt/wrt/view.do?wrtSn=11001765&menuNo=200018"
+  },
+  {
+   "id": "gongu-11001773",
+   "url": "https://gongu.copyright.or.kr/gongu/wrt/cmmn/wrtFileDownload.do?wrtSn=11001773&fileSn=1",
+   "caption": "서울 성산대교의 저녁",
+   "times": [
+    "sunset",
+    "night"
+   ],
+   "artist": "김순식",
+   "source": "https://gongu.copyright.or.kr/gongu/wrt/wrt/view.do?wrtSn=11001773&menuNo=200018"
+  },
+  {
+   "id": "gongu-11001762",
+   "url": "https://gongu.copyright.or.kr/gongu/wrt/cmmn/wrtFileDownload.do?wrtSn=11001762&fileSn=1",
+   "caption": "서울 성산대교의 저녁",
+   "times": [
+    "sunset",
+    "night"
+   ],
+   "artist": "김순식",
+   "source": "https://gongu.copyright.or.kr/gongu/wrt/wrt/view.do?wrtSn=11001762&menuNo=200018"
+  },
+  {
+   "id": "gongu-11004102",
+   "url": "https://gongu.copyright.or.kr/gongu/wrt/cmmn/wrtFileDownload.do?wrtSn=11004102&fileSn=1",
+   "caption": "부산의 밤",
+   "times": [
+    "night"
+   ],
+   "artist": "김순식",
+   "source": "https://gongu.copyright.or.kr/gongu/wrt/wrt/view.do?wrtSn=11004102&menuNo=200018"
+  },
+  {
+   "id": "gongu-11004101",
+   "url": "https://gongu.copyright.or.kr/gongu/wrt/cmmn/wrtFileDownload.do?wrtSn=11004101&fileSn=1",
+   "caption": "부산의 밤",
+   "times": [
+    "night"
+   ],
+   "artist": "김순식",
+   "source": "https://gongu.copyright.or.kr/gongu/wrt/wrt/view.do?wrtSn=11004101&menuNo=200018"
+  },
+  {
+   "id": "gongu-11004095",
+   "url": "https://gongu.copyright.or.kr/gongu/wrt/cmmn/wrtFileDownload.do?wrtSn=11004095&fileSn=1",
+   "caption": "부산의 저녁",
+   "times": [
+    "sunset",
+    "night"
+   ],
+   "artist": "김순식",
+   "source": "https://gongu.copyright.or.kr/gongu/wrt/wrt/view.do?wrtSn=11004095&menuNo=200018"
+  },
+  {
+   "id": "gongu-11142156",
+   "url": "https://gongu.copyright.or.kr/gongu/wrt/cmmn/wrtFileDownload.do?wrtSn=11142156&fileSn=1",
+   "caption": "부산의 밤",
+   "times": [
+    "night"
+   ],
+   "artist": "송영은",
+   "source": "https://gongu.copyright.or.kr/gongu/wrt/wrt/view.do?wrtSn=11142156&menuNo=200018"
+  },
+  {
+   "id": "gongu-11142212",
+   "url": "https://gongu.copyright.or.kr/gongu/wrt/cmmn/wrtFileDownload.do?wrtSn=11142212&fileSn=1",
+   "caption": "부산의 불꽃 축제",
+   "times": [
+    "night"
+   ],
+   "artist": "송영은",
+   "source": "https://gongu.copyright.or.kr/gongu/wrt/wrt/view.do?wrtSn=11142212&menuNo=200018"
+  },
+  {
+   "id": "gongu-11142178",
+   "url": "https://gongu.copyright.or.kr/gongu/wrt/cmmn/wrtFileDownload.do?wrtSn=11142178&fileSn=1",
+   "caption": "부산의 불빛 공연",
+   "times": [
+    "night"
+   ],
+   "artist": "송영은",
+   "source": "https://gongu.copyright.or.kr/gongu/wrt/wrt/view.do?wrtSn=11142178&menuNo=200018"
+  },
+  {
+   "id": "gongu-11142112",
+   "url": "https://gongu.copyright.or.kr/gongu/wrt/cmmn/wrtFileDownload.do?wrtSn=11142112&fileSn=1",
+   "caption": "서울 청계천의 밤",
+   "times": [
+    "night"
+   ],
+   "artist": "송영은",
+   "source": "https://gongu.copyright.or.kr/gongu/wrt/wrt/view.do?wrtSn=11142112&menuNo=200018"
+  }
+ ]
+}
