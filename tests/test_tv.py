@@ -134,13 +134,31 @@ class UpdateTv(unittest.TestCase):
         self.assertFalse(self.status("delete"))
         self.assertIn("MY_F0001", self.state["uploaded"])
 
-    def test_failed_delete_is_not_tried_again(self):
+    def test_failed_delete_is_retried_on_the_next_change(self):
         art = FakeArt(delete_raises=True)
-        self.run_update(art)
+        first_id = self.run_update(art)
         self.assertFalse(self.status("delete"))
-        art.quirks["delete_raises"] = False
-        self.run_update(art)
         self.assertEqual(art.deleted, [])
+        self.assertEqual(self.state["uploaded"], ["MY_F0001", first_id])
+
+        art.quirks["delete_raises"] = False
+        second_id = self.run_update(art)
+        self.assertEqual(art.deleted, ["MY_F0001", first_id])
+        self.assertEqual(art.photos, [second_id])
+        self.assertEqual(self.state["uploaded"], [second_id])
+        self.assertTrue(self.status("delete"))
+
+    def test_retry_does_not_send_ids_that_are_already_gone(self):
+        art = FakeArt(photos=("MY_F0001", "MY_F0099"))
+        self.state["uploaded"].append("MY_F0088")
+        frame.record(self.profile, "delete", False, "no reply")
+
+        new_id = self.run_update(art)
+
+        self.assertEqual(art.deleted, ["MY_F0001"])
+        self.assertEqual(art.photos, ["MY_F0099", new_id])
+        self.assertEqual(self.state["uploaded"], [new_id])
+        self.assertTrue(self.status("delete"))
 
     def test_only_uploaded_images_are_ever_deleted(self):
         self.state["uploaded"] = ["SAM-1", "MY_F0001"]
