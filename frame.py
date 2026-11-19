@@ -412,10 +412,6 @@ def record(profile, feature, ok, detail=""):
     }
 
 
-def feature_failed(profile, feature):
-    return profile.get("features", {}).get(feature, {}).get("ok") is False
-
-
 def my_images(art):
     """Images uploaded to the TV. The folder id is not the same on every model."""
     try:
@@ -487,8 +483,13 @@ def update_tv(art, path, state, cleanup, profile, show_at=None, art_mode_only=Fa
     stale = [i for i in uploaded if i != new_id and i.startswith("MY_")]
     if not stale:
         return new_id
-    if not cleanup or not shown or feature_failed(profile, "delete"):
+    if not cleanup or not shown:
         print(f"keeping {len(stale)} old image(s)", flush=True)
+        return new_id
+    # A previous deletion may have succeeded even when its response was lost.
+    stale = [i for i in stale if i in before]
+    if not stale:
+        state["uploaded"] = [new_id]
         return new_id
     try:
         answer = art.delete_list(stale)

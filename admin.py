@@ -365,7 +365,7 @@ def install_update():
 
 @app.post("/api/tv/retest")
 def retest_tv():
-    """Forget past results, so that features switched off after a failure are tried again."""
+    """Clear stored TV compatibility results."""
     write_json("tv_profile.json", {})
     return jsonify(ok=True)
 
